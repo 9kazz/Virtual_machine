@@ -1,0 +1,7 @@
+PUSH 17
+PUSH 42
+ADD
+
+
+OUT
+HLT
