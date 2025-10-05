@@ -8,15 +8,19 @@
 
 #include "utils.h"
 #include "calculator.h"
+#include "LogFile.h"
+#include "type_struct_def.h"    
+#include "stack_utils.h"
+#include "stack.h"
 
-int* create_bit_code_buf (FILE* input_file, size_t* bit_code_size) {
+int* create_bite_code_buf (FILE* input_file, size_t* bite_code_size) {
 
     size_t count_of_lines = 0;
     fscanf(input_file, "%d", &count_of_lines); // TODO: обработка ошибок ...=scanf
     
-    *bit_code_size = 2 * count_of_lines;
+    *bite_code_size = 2 * count_of_lines;
 
-    int* bit_code_buf = (int*) calloc(*bit_code_size, sizeof(int));
+    int* bite_code_buf = (int*) calloc(*bite_code_size, sizeof(int));
 
     int command  = 0;
     int argument = 0;
@@ -25,9 +29,9 @@ int* create_bit_code_buf (FILE* input_file, size_t* bit_code_size) {
 
         fscanf(input_file, "%d %d", &command, &argument);
 
-        bit_code_buf[ el_num++ ] = command;
-        bit_code_buf[ el_num++ ] = argument;
+        bite_code_buf[ el_num++ ] = command;
+        bite_code_buf[ el_num++ ] = argument;
     }
 
-    return bit_code_buf;
+    return bite_code_buf;
 }

@@ -38,11 +38,11 @@ int* fill_bit_code_buf (char** pointers_array, size_t count_of_lines, int* bit_c
         
         switch (sscanf_checking)
         {
-            case 1: 
+            case 1:  // one argument TODO
                 argument = POISON;
                 break;
 
-            case 2:
+            case 2: // two arguments
                 break;
 
             default:
@@ -62,26 +62,29 @@ int* fill_bit_code_buf (char** pointers_array, size_t count_of_lines, int* bit_c
 int command_identify (const char* command) {
     
     if (strcmp(command, "PUSH") == 0) {
-        return PUSH;
+        return CMD_PUSH;
 
     } else if (strcmp(command, "ADD") == 0) {
-        return ADD;
+        return CMD_ADD;
 
     } else if (strcmp(command, "SUB") == 0) {
-        return SUB;
+        return CMD_SUB;
 
     } else if (strcmp(command, "MUL") == 0) {
-        return MUL;
+        return CMD_MUL;
 
     } else if (strcmp(command, "DIV") == 0) {
-        return DIV;
+        return CMD_DIV;
     
     } else if (strcmp(command, "OUT") == 0) {
-        return OUT;
+        return CMD_OUT;
     
     } else if (strcmp(command, "HLT") == 0) {
-        return HLT;
+        return CMD_HLT;
     
+    } else if (strcmp(command, "SQRT") == 0) {
+        return CMD_SQRT;
+
     } else 
         return UNKNOWN_COM;
 }

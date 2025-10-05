@@ -1,8 +1,14 @@
 #ifndef CALCULATOR_H
 #define CALCULATOR_H
 
-int calculator(stack_struct* stack, int* bit_code_buf, size_t bit_code_size);
+#include "utils.h"
+#include "LogFile.h"
+#include "type_struct_def.h"    
+#include "stack_utils.h"
+#include "stack.h"
 
-int Stack_Calc (stack_struct* stack, int operator);
+void calculator(CalcStruct*   calc_struct);
+
+int  Stack_Calc(stack_struct* stack, int  arif_operator);
 
 #endif

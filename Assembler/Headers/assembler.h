@@ -6,14 +6,14 @@ enum errors {
 };
 
 enum commands {
-    HLT         =  0,
-    POP         =  1,
-    PUSH        =  2,
-    OUT         =  3,
-    ADD         =  4,
-    SUB         =  5,
-    MUL         =  6,
-    DIV         =  7
+    CMD_HLT         =  0,
+    CMD_PUSH        =  1,
+    CMD_OUT         =  2,
+    CMD_ADD         =  3,
+    CMD_SUB         =  4,
+    CMD_MUL         =  5,
+    CMD_DIV         =  6,
+    CMD_SQRT        =  7
 };
 
 const int POISON           = 0xDEADFACE;
