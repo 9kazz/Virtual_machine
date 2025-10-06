@@ -93,10 +93,8 @@ char** fill_point_ar (char** pointers_array, char* asm_code_buf, size_t count_of
 }
 
 
-void fprint_bite_code (FILE* output_file, int* bit_code_buf, size_t bit_code_capacity, size_t count_of_lines) {
-    
-    fprintf(output_file, "%d\n", count_of_lines);
-    
+void fprint_bite_code (FILE* output_file, int* bit_code_buf, size_t bit_code_capacity) {
+        
     size_t el_num = 0;
 
     while (el_num < bit_code_capacity) 
@@ -104,4 +102,16 @@ void fprint_bite_code (FILE* output_file, int* bit_code_buf, size_t bit_code_cap
         fprintf(output_file, "%d\t", bit_code_buf[ el_num++ ]);
         fprintf(output_file, "%d\n", bit_code_buf[ el_num++ ]);
     }
+}
+
+int my_strcmp(const char* str1, const char* str2) {
+
+    while (*str1 != '\0' &&
+           *str1 == *str2) 
+    {
+        ++str1;
+        ++str2;
+    }
+
+    return *str1 - *str2;
 }

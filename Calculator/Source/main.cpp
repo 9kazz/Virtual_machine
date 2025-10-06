@@ -27,15 +27,15 @@ int main() {
 
     // for (size_t i = 0; i < bite_code_size; i += 2)
     //     printf("%d\t%d\n", bite_code_buf[i], bite_code_buf[i + 1]);
-`
+
     // INIT_STK(calc_stack);
     // Stack_Ctor(&calc_stack, bite_code_size);
 
     calculator(&calc_struct);
 
-    // for (int i = 0; i < calc_stack.capacity; i++)
-    //     printf("%d ", calc_stack.data[i]);
-    printf("\n%d %d", calc_struct.calc_stack.cur_position, calc_struct.calc_stack.data[0]);
+    for (int i = 0; i < calc_struct.calc_stack.cur_position; i++)
+        printf("%d ", calc_struct.calc_stack.data[i]);
+    // printf("\n%d", calc_struct.calc_stack.data[0]);
 
     fclose(input_file);
     fclose(output_file);

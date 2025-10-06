@@ -16,8 +16,8 @@
 
 void calculator(CalcStruct* calc_struct) {
 
-    size_t bite_code_size = calc_struct -> bite_code.size;
-    int* bite_code_buf    = calc_struct -> bite_code.buffer;
+    size_t bite_code_size =   calc_struct -> bite_code.size;
+    int*   bite_code_buf  =   calc_struct -> bite_code.buffer;
     stack_struct* stack   = &(calc_struct -> calc_stack);
 
     size_t ind = 0;
@@ -41,6 +41,24 @@ void calculator(CalcStruct* calc_struct) {
 
             case CMD_ADD: case CMD_SUB: case CMD_MUL: case CMD_DIV: case CMD_SQRT:
                 Stack_Calc(stack, arif_operator);
+                break;
+
+            case CMD_PUSHR:
+            {
+                int register_num = bite_code_buf[ind + 1];
+                Stack_PushR(calc_struct, register_num);
+                break;
+            }
+
+            case CMD_POPR:
+            {
+                int register_num = bite_code_buf[ind + 1];
+                Stack_PopR(calc_struct, register_num);
+                break;
+            }
+
+            case CMD_IN:
+                Stack_In(calc_struct);
                 break;
 
             default:
@@ -91,11 +109,53 @@ int Stack_Calc (stack_struct* stack, int arif_operator) {
         break;
 
     default:
-        fprintf(stderr, "stack_Calc: incorrect operator (%d)", arif_operator);
+        fprintf(stderr, "Stack_Calc: incorrect operator (%d)", arif_operator);
         return UNKNOWN_COM;
     }
 
     Stack_Push(stack, result);
 
     return CALC_SUCCESS;
+}
+
+StackErr_t Stack_PushR (CalcStruct* calc_struct, int register_num) {
+    assert(calc_struct);
+    assert(register_num >= 0 && register_num <= COUNT_OF_REG);
+
+    stack_t       value = calc_struct -> register_buf[register_num];
+    stack_struct* stack = &(calc_struct -> calc_stack);
+
+    return Stack_Push(stack, value);
+}
+
+StackErr_t Stack_PopR (CalcStruct* calc_struct, int register_num) {
+    assert(calc_struct);
+    assert(register_num >= 0 && register_num <= COUNT_OF_REG);
+
+    stack_struct* stack = &(calc_struct -> calc_stack);
+    stack_t       value = Stack_Pop(stack);
+
+    calc_struct -> register_buf[register_num] = value;
+
+    return SUCCESS;
+}
+
+StackErr_t Stack_In (CalcStruct* calc_struct) {
+    assert(calc_struct);
+
+    printf("Enter value:\t");
+
+    stack_struct* stack = &(calc_struct -> calc_stack);
+
+    int value = 0;
+    int scanf_checking = scanf("%d", &value);
+
+    if (scanf_checking != 1) {
+        printf("Incorrect input");
+        return INCOR_INPUT;
+    }
+
+    Stack_Push(stack, value);
+
+    return SUCCESS;
 }

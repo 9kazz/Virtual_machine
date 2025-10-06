@@ -14,6 +14,8 @@ size_t str_change_char       (char*  asm_code_buf,   char  original_char_code, c
 
 char** fill_point_ar         (char** pointers_array, char* asm_code_buf,       size_t count_of_lines);
 
-void   fprint_bite_code      (FILE*  output_file,    int*  bit_code_buf,       size_t bit_code_capacity, size_t count_of_lines);
+void   fprint_bite_code      (FILE*  output_file,    int*  bit_code_buf,       size_t bit_code_capacity);
+
+int    my_strcmp             (const char* str1,      const char* str2);
 
 #endif

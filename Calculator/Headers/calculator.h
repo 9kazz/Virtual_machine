@@ -11,4 +11,8 @@ void calculator(CalcStruct*   calc_struct);
 
 int  Stack_Calc(stack_struct* stack, int  arif_operator);
 
+StackErr_t Stack_PushR (CalcStruct* calc_struct, int register_num);
+StackErr_t Stack_PopR  (CalcStruct* calc_struct, int register_num);
+StackErr_t Stack_In    (CalcStruct* calc_struct);
+
 #endif

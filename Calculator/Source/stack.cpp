@@ -114,16 +114,16 @@ StackErr_t Stack_Dtor(stack_struct* stack) {
     return VERIFY_SUCCESS;
 }
 
-stack_t Stack_LastEl(stack_struct* stack) {
+stack_t Stack_Top(stack_struct* stack) {
     
-    Stack_Verify(stack, "Stack_LastEl");
+    Stack_Verify(stack, "Stack_Top");
 
     size_t last_el_index = stack -> cur_position - 1;
 
     #ifdef DEBUG_HESH
         stack_hesh_function(stack);
     #endif
-    Stack_Verify(stack, "Stack_LastEl");
+    Stack_Verify(stack, "Stack_Top");
 
     return stack -> data[last_el_index];
 }

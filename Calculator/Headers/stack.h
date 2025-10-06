@@ -64,7 +64,7 @@ stack_t    Stack_Pop    (stack_struct* stack);
 
 StackErr_t Stack_Dtor   (stack_struct* stack);
 
-stack_t    Stack_LastEl (stack_struct* stack);
+stack_t    Stack_Top    (stack_struct* stack);
 
 StackErr_t Stack_Realloc(stack_struct* stack);
 

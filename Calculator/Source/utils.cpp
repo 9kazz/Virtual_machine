@@ -15,23 +15,42 @@
 
 int* create_bite_code_buf (FILE* input_file, size_t* bite_code_size) {
 
-    size_t count_of_lines = 0;
-    fscanf(input_file, "%d", &count_of_lines); // TODO: обработка ошибок ...=scanf
-    
-    *bite_code_size = 2 * count_of_lines;
+    *bite_code_size = size_of_file(input_file);
 
     int* bite_code_buf = (int*) calloc(*bite_code_size, sizeof(int));
 
     int command  = 0;
     int argument = 0;
 
-    for (size_t line_num = 0, el_num = 0; line_num < count_of_lines; line_num++) {
+    size_t el_num = 0;
 
-        fscanf(input_file, "%d %d", &command, &argument);
+    while (el_num  < *bite_code_size) {
+
+        int end_of_file_checking = fscanf(input_file, "%d %d", &command, &argument);
+
+        if (end_of_file_checking == EOF)
+            break;
 
         bite_code_buf[ el_num++ ] = command;
         bite_code_buf[ el_num++ ] = argument;
     }
 
     return bite_code_buf;
+}
+
+size_t size_of_file (FILE* file_input) {
+    struct stat file_info;
+
+    int descriptor = fileno(file_input);
+
+    int check = fstat(descriptor, &file_info);
+
+    assert(check != -1);
+    
+        if (check == -1) {
+            fprintf(stderr, "size_of_file: error");
+            return 0;
+        }
+    
+    return file_info.st_size;         
 }
