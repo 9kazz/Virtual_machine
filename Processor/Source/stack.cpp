@@ -11,18 +11,12 @@ StackErr_t Stack_Ctor(stack_struct* stack, int size_of_stack) {
 
     Stack_Verify_Ctor(stack, size_of_stack);
 
-    if (size_of_stack < 0)
-        size_of_stack *= -1;
-    
-    else if (size_of_stack == 0)
-        size_of_stack = 1;
-
     #ifdef DEBUG_CANARY
     
         stack_t* temp_pointer = (stack_t*) calloc( (size_t) size_of_stack + 2, sizeof(stack -> data[0]));
 
         if (temp_pointer == NULL) {
-            fprintf(LogFile, "Stack_Ctor: allocation error" "\n\n" );
+            fprintf(LogFile, "Stack_Ctor: NULL pointer" "\n\n" );
             return ALLOC_ERR;
         }
 
@@ -36,7 +30,7 @@ StackErr_t Stack_Ctor(stack_struct* stack, int size_of_stack) {
     
         stack -> capacity = size_of_stack;
 
-        return FINISHED;
+        return CREATE_SUCCESS;
 
 
     #else
@@ -44,7 +38,7 @@ StackErr_t Stack_Ctor(stack_struct* stack, int size_of_stack) {
         stack_t* temp_pointer = (stack_t*) calloc( (size_t) size_of_stack, sizeof(stack -> data[0]));
 
         if (temp_pointer == NULL) {
-            fprintf(LogFile, "Stack_Ctor: allocation error" "\n\n");
+            fprintf(LogFile, "Stack_Ctor: NULL pointer" "\n\n");
             return ALLOC_ERR;
         }
 
@@ -55,12 +49,12 @@ StackErr_t Stack_Ctor(stack_struct* stack, int size_of_stack) {
 
         stack -> capacity = size_of_stack;
 
-        #ifdef DEBUG_HASH
-            stack_hash_function(stack);
+        #ifdef DEBUG_HESH
+            stack_hesh_function(stack);
         #endif
         Stack_Verify_Ctor(stack, size_of_stack);
 
-        return FINISHED;
+        return CREATE_SUCCESS;
 
     #endif
 }
@@ -76,12 +70,12 @@ StackErr_t Stack_Push(stack_struct* stack, stack_t value) {
 
     ++(stack -> cur_position);
 
-    #ifdef DEBUG_HASH
-        stack_hash_function(stack);
+    #ifdef DEBUG_HESH
+        stack_hesh_function(stack);
     #endif
     Stack_Verify(stack, "Stack_Push");
     
-    return FINISHED;
+    return VERIFY_SUCCESS;
 }
 
 stack_t Stack_Pop(stack_struct* stack) { 
@@ -93,8 +87,8 @@ stack_t Stack_Pop(stack_struct* stack) {
     stack_t temp_buffer = stack -> data[stack -> cur_position];
     stack -> data[stack -> cur_position] = POISON;
 
-    #ifdef DEBUG_HASH
-        stack_hash_function(stack);
+    #ifdef DEBUG_HESH
+        stack_hesh_function(stack);
     #endif
     Stack_Verify(stack, "Stack_Pop");
 
@@ -112,12 +106,12 @@ StackErr_t Stack_Dtor(stack_struct* stack) {
 
     free(stack); 
 
-    #ifdef DEBUG_HASH
-        stack_hash_function(stack);
+    #ifdef DEBUG_HESH
+        stack_hesh_function(stack);
     #endif
     Stack_Verify(stack, "Stack_Dtor");
 
-    return FINISHED;
+    return VERIFY_SUCCESS;
 }
 
 stack_t Stack_Top(stack_struct* stack) {
@@ -126,8 +120,8 @@ stack_t Stack_Top(stack_struct* stack) {
 
     size_t last_el_index = stack -> cur_position - 1;
 
-    #ifdef DEBUG_HASH
-        stack_hash_function(stack);
+    #ifdef DEBUG_HESH
+        stack_hesh_function(stack);
     #endif
     Stack_Verify(stack, "Stack_Top");
 
@@ -143,7 +137,7 @@ StackErr_t Stack_Realloc(stack_struct* stack) {
     stack_t* temp_pointer = (stack_t*) realloc(stack, new_capacity);
 
     if ( ! temp_pointer) {
-        fprintf(LogFile, "Stack_Ctor: allocation error" "\n\n" );
+        fprintf(LogFile, "Stack_Ctor: NULL pointer" "\n\n" );
         return ALLOC_ERR;
     }
 
@@ -158,10 +152,10 @@ StackErr_t Stack_Realloc(stack_struct* stack) {
 
     stack -> capacity = new_capacity;
 
-    #ifdef DEBUG_HASH
-        stack_hash_function(stack);
+    #ifdef DEBUG_HESH
+        stack_hesh_function(stack);
     #endif
     Stack_Verify(stack, "Stack_Realloc");
     
-    return FINISHED;
+    return VERIFY_SUCCESS;
 }

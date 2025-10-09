@@ -6,8 +6,8 @@
 #include <ctype.h>
 #include <assert.h>
 
-#include "processor.h"
 #include "utils.h"
+#include "processor.h"
 #include "LogFile.h"
 #include "type_struct_def.h"    
 #include "stack_utils.h"
@@ -37,9 +37,8 @@ int main() {
         printf("%d ", calc_struct.calc_stack.data[i]);
     // printf("\n%d", calc_struct.calc_stack.data[0]);
 
+    Proc_Dtor(&calc_struct);
 
-    Calc_Dtor(&calc_struct);
-    
     fclose(input_file);
     fclose(output_file);
     fclose(LogFile);

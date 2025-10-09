@@ -15,22 +15,21 @@
 
 StackErr_t Stack_Dump                 (stack_struct* stack);
 
-StackErr_t Stack_Verify_Ctor          (stack_struct* stack,  int         size_of_stack);
+StackErr_t Stack_Verify_Ctor          (stack_struct* stack, int         size_of_stack);
 
-StackErr_t Stack_Verify               (stack_struct* stack,  const char* checking_function);
+StackErr_t Stack_Verify               (stack_struct* stack, const char* checking_function);
 
 #ifdef DEBUG_CANARY
+    StackErr_t canary_checking        (stack_struct* stack, const char* checking_function);
+    StackErr_t struct_canary_checking (stack_struct* stack, const char* checking_function);
 
-    StackErr_t struct_canary_checking  (stack_struct* stack, const char* checking_function, int* error_code);
-    StackErr_t buffer_canary_checking  (stack_struct* stack, const char* checking_function, int* error_code);
-
-#elif DEBUG_HASH    
-    int        stack_hash_function    (stack_struct* stack);
-    StackErr_t stack_hash_checking    (stack_struct* stack,  const char* checking_function, int* error_code);
+#elif DEBUG_HESH    
+    int        stack_hesh_function    (stack_struct* stack);
+    StackErr_t stack_hesh_checking    (stack_struct* stack, const char* checking_function);
 
 #endif
 
-StackErr_t fopen_checking(FILE* opening_file);
+StackErr_t fopen_checking (FILE* file);
 
 
 #endif

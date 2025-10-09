@@ -30,14 +30,14 @@
             name.capacity                    = 0;           \
             name.cur_position                = 0;       
 
-#elif DEBUG_HASH  
+#elif DEBUG_HESH  
     #define INIT_STK(name)                                  \
         stack_struct name {};                               \
             name.info.stack_name             = #name;       \
             name.info.origin_function        = __func__;    \
             name.info.origin_file            = __FILE__;    \
             name.info.origin_line            = __LINE__;    \
-            name.hash                        = 0;           \
+            name.hesh                        = 0;           \
             name.data                        = NULL;        \
             name.capacity                    = 0;           \
             name.cur_position                = 0;      

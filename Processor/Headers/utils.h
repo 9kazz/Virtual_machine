@@ -3,16 +3,14 @@
 
 #include <stdio.h>
 
-#include "processor.h"
 #include "LogFile.h"
-#include "stack_utils.h"
 #include "type_struct_def.h"    
+#include "stack_utils.h"
 #include "stack.h"
-#include "utils.h"
 
 enum errors_and_success {
     UNKNOWN_COM = -100,
-    INCOR_INPUT = -101,
+    INCOR_INPUT = -101, 
     DESTROY_SUC =  100, 
     SUCCESS     =  777
 };
@@ -26,10 +24,16 @@ enum commands {
     CMD_MUL         =  5,
     CMD_DIV         =  6,
     CMD_SQRT        =  7,
-    CMD_JMP         =  9,
     CMD_PUSHR       = 33,
     CMD_POPR        = 34,
-    CMD_IN          = 35
+    CMD_IN          = 35,
+    CMD_JMP         = 64,
+    CMD_JB          = 65,
+    CMD_JBE         = 66,
+    CMD_JA          = 67,
+    CMD_JAE         = 68,
+    CMD_JE          = 69,
+    CMD_JNE         = 70
 };
 
 const int COUNT_OF_REG = 8;
@@ -64,14 +68,8 @@ struct CalcStruct {
         name.register_buf = name##_reg_arr;
     
 
-int*      create_bite_code_buf (FILE* input_file, size_t* bite_code_size);
+int*   create_bite_code_buf (FILE* input_file, size_t* bite_code_size);
 
-size_t    size_of_file         (FILE* file_input);
-
-CalcErr_t Calc_Dtor            (CalcStruct* calc_struct);
-
-CalcErr_t Calc_Verify          (CalcStruct* calc_struct, const char* checking_function);
-
-CalcErr_t Calc_Dump            (CalcStruct* calc_struct);
+size_t size_of_file         (FILE* file_input);
 
 #endif

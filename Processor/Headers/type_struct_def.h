@@ -12,6 +12,8 @@ const int CANARY = 0xFEEDCAFE;
 
 const size_t max_stack_capasity = (size_t) -16;
 
+typedef int StackErr_t;
+
 
 #ifdef DEBUG_CANARY
 
@@ -51,7 +53,7 @@ const size_t max_stack_capasity = (size_t) -16;
         size_t            cur_position;
     };
 
-#elif DEBUG_HASH
+#elif DEBUG_HESH
 
     struct stack_origin_info
     {
@@ -64,7 +66,7 @@ const size_t max_stack_capasity = (size_t) -16;
     struct stack_struct
     {
         stack_origin_info info;
-        int               hash;
+        int               hesh;
         stack_t*          data;
         size_t            capacity;
         size_t            cur_position;
@@ -80,33 +82,32 @@ const size_t max_stack_capasity = (size_t) -16;
 
 #endif
 
-enum other_const {
-    RELEASE_MODE  =  0xCAFEBABE,
-    FINISHED      =  777,
-    FILE_OPEN_ERR = -111,
-    FILE_OPEN_SUC =  111,
-    ALLOC_ERR     = -222,
-    DUMP_FAILED   = -333,
-    DUMP_SUCCESS  =  333
+
+enum canary_error {
+    NO_EXIT           =  1,
+    LEFT_EXIT         = -1,
+    RIGHT_EXIT        = -2,
+    LEFT_n_RIGHT_EXIT = -3
 };
 
-enum stack_errors {
-    NULL_POINT_STK    =   1,
-    NULL_POINT_DATA   =   2,
-    STK_OVERFLOW      =   4,
-    MAX_CAPASITY      =   8,
-    LEFT_n_RIGHT_EXIT =  16,
-    LEFT_EXIT         =  32,
-    RIGHT_EXIT        =  64,
-    HASH_CHANGE       = 128,
-    NEG_CAPASITY      = 256
-};
-
-enum calc_errors {
-    NULL_POINT_CALC   =   1,
-    NULL_POINT_BC_BUF =   2,
-    NEG_BC_SIZE       =   4,
-    NULL_POINT_REG    =   8
+enum error_type {
+    VERIFY_SUCCESS    =  2,
+    ALLOC_ERR         = -4,
+    NULL_POINTER      = -5,
+    CREATE_SUCCESS    =  5,
+    STACK_OVERFLOW    = -6,
+    MAX_CAPASITY      = -7,
+    CORRECT_CAPASITY  =  8,
+    NEG_CAPASITY      = -8,
+    HESH_ERR          = -9,
+    HESH_OK           =  9,
+    FILE_OPEN_ERR     = -10,
+    FILE_OPEN_SUCCESS =  10,
+    INCOR_OPERATOR    = -11,
+    CALC_SUCCESS      =  11,
+    RELEASE_MODE      =  12,
+    DUMP_SUCCESS      =  13,
+    DUMP_FAILED       = -13
 };
 
 #endif
