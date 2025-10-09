@@ -34,7 +34,7 @@ int main() {
     processor(&calc_struct);
 
     for (size_t i = 0; i < calc_struct.calc_stack.cur_position; i++)
-        printf("%d ", calc_struct.calc_stack.data[i]);
+        printf("%d\n", calc_struct.calc_stack.data[i]);
     // printf("\n%d", calc_struct.calc_stack.data[0]);
 
     Proc_Dtor(&calc_struct);
@@ -42,6 +42,8 @@ int main() {
     fclose(input_file);
     fclose(output_file);
     fclose(LogFile);
+
+    fprintf(stdout, "END WITH SUCCESS");
 
     return 0;
 }

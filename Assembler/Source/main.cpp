@@ -18,16 +18,16 @@ int main() {
     size_t count_of_lines = 0;
     char** pointers_array = create_pointers_array(input_file, &count_of_lines);
 
-    size_t bit_code_capacity = 0;
-    int* bit_code_buf = assembler (pointers_array, count_of_lines, &bit_code_capacity);
+    size_t byte_code_capacity = 0;
+    int* byte_code_buf = assembler (pointers_array, count_of_lines, &byte_code_capacity);
     
-    fprint_bite_code(output_file, bit_code_buf, bit_code_capacity);
+    fprint_byte_code(output_file, byte_code_buf, byte_code_capacity);
 
-        size_t el_num = 0;
-    while (el_num < bit_code_capacity) 
+    size_t el_num = 0;
+    while (el_num < byte_code_capacity) 
     {
-        fprintf(stdout, "%d\t", bit_code_buf[ el_num++ ]);
-        fprintf(stdout, "%d\n", bit_code_buf[ el_num++ ]);
+        fprintf(stdout, "%d\t", byte_code_buf[ el_num++ ]);
+        fprintf(stdout, "%d\n", byte_code_buf[ el_num++ ]);
     }
 
     fclose(input_file);

@@ -9,24 +9,32 @@
 #include "assembler.h"
 #include "utils.h"
 
-int* assembler (char** pointers_array, size_t count_of_lines, size_t* bit_code_capacity) {
+int* assembler (char** pointers_array, size_t count_of_lines, size_t* byte_code_capacity) {
+    assert(pointers_array);
+    assert(fill_byte_code_buf);
 
-    *bit_code_capacity = 2 * count_of_lines;
+    *byte_code_capacity = 2 * count_of_lines;
 
-    int* bit_code_buf = (int*) calloc(*bit_code_capacity, sizeof(char)); //??
+    int* byte_code_buf = (int*) calloc(*byte_code_capacity, sizeof(char)); //??
 
-    fill_bit_code_buf (pointers_array, count_of_lines, bit_code_buf);  // TODO: обработка ошибок
+    int* label_array = create_label_array();
 
-    return bit_code_buf;
+    fill_label_array(pointers_array, count_of_lines, label_array);
+
+    fill_byte_code_buf (pointers_array, count_of_lines, byte_code_buf, label_array);  // TODO: обработка ошибок
+
+    return byte_code_buf;
 }
 
-int* fill_bit_code_buf (char** pointers_array, size_t count_of_lines, int* bit_code_buf) {  // TODO: возврат ошибок
+int* fill_byte_code_buf (char** pointers_array, size_t count_of_lines, int* byte_code_buf, int* label_array) {  // TODO: возврат ошибок
+    assert(pointers_array);
+    assert(byte_code_buf);
 
     char command_str [COMMAND_MAX_LEN] = {0}; 
     char argument_str[COMMAND_MAX_LEN] = {0};
 
     size_t str_num         = 0;
-    size_t bit_code_index  = 0;
+    size_t byte_code_index  = 0;
     int    count_of_arg    = 0;
 
     while (str_num < count_of_lines && 
@@ -35,8 +43,8 @@ int* fill_bit_code_buf (char** pointers_array, size_t count_of_lines, int* bit_c
         count_of_arg = sscanf( (const char*) pointers_array[str_num], "%32s %32s", command_str, argument_str); // COMMAND_MAX_LEN = 32
 
         int  command_int = command_identify( (const char*) command_str); // TODO: UNKNOW_COM err analise
-        int argument_int = argument_identify(count_of_arg, command_int, (const char*) argument_str);
-        
+        int argument_int = argument_identify(count_of_arg, command_int, (const char*) argument_str, label_array);
+
         switch (count_of_arg)
         {
             case 1:  // one argument
@@ -51,16 +59,17 @@ int* fill_bit_code_buf (char** pointers_array, size_t count_of_lines, int* bit_c
                 return NULL;       
         }
 
-        bit_code_buf[ bit_code_index++ ] = command_int;
-        bit_code_buf[ bit_code_index++ ] = argument_int;
+        byte_code_buf[ byte_code_index++ ] = command_int;
+        byte_code_buf[ byte_code_index++ ] = argument_int;
 
         ++str_num;
     }
 
-    return bit_code_buf;
+    return byte_code_buf;
 }
 
 int command_identify (const char* command_str) {
+    assert(command_str);
     
     if (strcmp(command_str, "PUSH") == 0) {
         return CMD_PUSH;
@@ -94,11 +103,34 @@ int command_identify (const char* command_str) {
 
     } else if (strcmp(command_str, "IN") == 0) {
         return CMD_IN;
+
+    } else if (strcmp(command_str, "JMP") == 0) {
+        return CMD_JMP;
+
+    } else if (strcmp(command_str, "JB") == 0) {
+        return CMD_JB;
+        
+    } else if (strcmp(command_str, "JBE") == 0) {
+        return CMD_JBE;
+        
+    } else if (strcmp(command_str, "JA") == 0) {
+        return CMD_JA;
+        
+    } else if (strcmp(command_str, "JAE") == 0) {
+        return CMD_JAE;
+        
+    } else if (strcmp(command_str, "JE") == 0) {
+        return CMD_JE;
+        
+    } else if (strcmp(command_str, "JNE") == 0) {
+        return CMD_JNE;
+
     } else 
         return UNKNOWN_COM;
 }
 
-int argument_identify (int count_of_arg, int command_int, const char* argument_str) {
+int argument_identify (int count_of_arg, int command_int, const char* argument_str, int* label_array) {
+    assert(argument_str);
 
     switch (count_of_arg)
     {
@@ -108,13 +140,14 @@ int argument_identify (int count_of_arg, int command_int, const char* argument_s
 
         case 2: // two arguments
 
-            if (command_int == CMD_PUSHR ||
-                command_int == CMD_POPR  ||
-                command_int == CMD_IN)   
-            {
+            if (command_int >= 33 &&                                 // CMD_PUSHR = 33, CMD_POPR = 34, CMD_IN = 35
+                command_int <= 35)
                 return register_num(argument_str);
-            } 
-            
+
+            if (command_int >= 64 &&                                 // CMD_JMP = 64, CMD_JB  = 65, CMD_JBE = 66 
+                command_int <= 70)                                   // CMD_JA  = 67, CMD_JAE = 68, CMD_JE  = 69, CMD_JNE = 70
+                return identify_label(argument_str, label_array);
+
             return atoi(argument_str);
 
         default:
@@ -126,6 +159,7 @@ int argument_identify (int count_of_arg, int command_int, const char* argument_s
 }
 
 int register_num (const char* argument_str) {
+    assert(argument_str);
 
     const char* first_reg = "RAX";
 
@@ -140,3 +174,56 @@ int register_num (const char* argument_str) {
 
     return offset_from_first_reg;
 }
+
+int* create_label_array (void) {
+
+    int* label_array = (int*) calloc(LABEL_BUF_SIZE, sizeof(int));
+
+    if (label_array == NULL) {
+        fprintf(stderr, "create_label_array: Allocation error");
+        return label_array;
+    }
+    
+    return label_array;
+}
+
+int* fill_label_array (char** pointers_array, size_t count_of_lines, int* label_array) {
+    assert(pointers_array);
+    assert(label_array);
+
+    int    label    = 0;
+    size_t line_num = 0;
+
+    while (line_num < count_of_lines && 
+           pointers_array[line_num] != NULL)
+    {
+        if ( * (pointers_array[line_num] + 1) == ':') 
+        {
+            label = *pointers_array[line_num] - '0';
+            label_array[label] = line_num + 1;
+        }
+
+        ++line_num;
+    }
+
+    return label_array;
+}
+
+int identify_label (const char* argument_str, int* label_array) {
+    assert(argument_str);
+
+    int label_number = atoi(argument_str + 1);
+
+    if (label_number < 0 ||
+        label_number > 9) 
+    {
+        fprintf(stderr, "Incorrect label");
+        return -1;
+    }
+
+    int argument_int = label_array[label_number];
+
+    return argument_int;
+}
+
+

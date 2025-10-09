@@ -93,14 +93,14 @@ char** fill_point_ar (char** pointers_array, char* asm_code_buf, size_t count_of
 }
 
 
-void fprint_bite_code (FILE* output_file, int* bit_code_buf, size_t bit_code_capacity) {
+void fprint_byte_code (FILE* output_file, int* byte_code_buf, size_t byte_code_capacity) {
         
     size_t el_num = 0;
 
-    while (el_num < bit_code_capacity) 
+    while (el_num < byte_code_capacity) 
     {
-        fprintf(output_file, "%d\t", bit_code_buf[ el_num++ ]);
-        fprintf(output_file, "%d\n", bit_code_buf[ el_num++ ]);
+        fprintf(output_file, "%d\t", byte_code_buf[ el_num++ ]);
+        fprintf(output_file, "%d\n", byte_code_buf[ el_num++ ]);
     }
 }
 
