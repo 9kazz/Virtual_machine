@@ -19,16 +19,15 @@ int main() {
     char** pointers_array = create_pointers_array(input_file, &count_of_lines);
 
     size_t byte_code_capacity = 0;
-    int* byte_code_buf = assembler (pointers_array, count_of_lines, &byte_code_capacity);
+    int* byte_code_buf = assembler (pointers_array, &count_of_lines, &byte_code_capacity);
     
-    fprint_byte_code(output_file, byte_code_buf, byte_code_capacity);
+    fprint_byte_code(output_file, byte_code_buf, count_of_lines);
 
-    size_t el_num = 0;
-    while (el_num < byte_code_capacity) 
-    {
-        fprintf(stdout, "%d\t", byte_code_buf[ el_num++ ]);
-        fprintf(stdout, "%d\n", byte_code_buf[ el_num++ ]);
-    }
+    // size_t el_num = 0;
+    // while (el_num < 10) 
+    // {
+    //     fprintf(stdout, "%d\t", label_array[el_num]);
+    // }
 
     fclose(input_file);
     fclose(output_file);

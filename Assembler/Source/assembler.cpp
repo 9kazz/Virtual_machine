@@ -9,24 +9,26 @@
 #include "assembler.h"
 #include "utils.h"
 
-int* assembler (char** pointers_array, size_t count_of_lines, size_t* byte_code_capacity) {
+int* assembler (char** pointers_array, size_t* count_of_lines, size_t* byte_code_capacity) {
     assert(pointers_array);
     assert(fill_byte_code_buf);
 
-    *byte_code_capacity = 2 * count_of_lines;
+    *byte_code_capacity = 2 * (*count_of_lines);
 
-    int* byte_code_buf = (int*) calloc(*byte_code_capacity, sizeof(char)); //??
+    int* byte_code_buf = (int*) calloc(*byte_code_capacity, sizeof(byte_code_buf[0])); //??
 
     int* label_array = create_label_array();
 
-    fill_label_array(pointers_array, count_of_lines, label_array);
+    fill_label_array(pointers_array, *count_of_lines, label_array);
 
     fill_byte_code_buf (pointers_array, count_of_lines, byte_code_buf, label_array);  // TODO: обработка ошибок
+
+    free(label_array);
 
     return byte_code_buf;
 }
 
-int* fill_byte_code_buf (char** pointers_array, size_t count_of_lines, int* byte_code_buf, int* label_array) {  // TODO: возврат ошибок
+int* fill_byte_code_buf (char** pointers_array, size_t* count_of_lines, int* byte_code_buf, int* label_array) {  // TODO: возврат ошибок
     assert(pointers_array);
     assert(byte_code_buf);
 
@@ -34,13 +36,21 @@ int* fill_byte_code_buf (char** pointers_array, size_t count_of_lines, int* byte
     char argument_str[COMMAND_MAX_LEN] = {0};
 
     size_t str_num         = 0;
-    size_t byte_code_index  = 0;
+    size_t byte_code_index = 0;
     int    count_of_arg    = 0;
 
-    while (str_num < count_of_lines && 
+    size_t count_of_commands = *count_of_lines;
+
+    while (str_num < count_of_commands && 
            pointers_array[str_num] != NULL) 
     {
         count_of_arg = sscanf( (const char*) pointers_array[str_num], "%32s %32s", command_str, argument_str); // COMMAND_MAX_LEN = 32
+
+        if (is_label(command_str)) {
+            --(*count_of_lines);
+            ++str_num;
+            continue;
+        }
 
         int  command_int = command_identify( (const char*) command_str); // TODO: UNKNOW_COM err analise
         int argument_int = argument_identify(count_of_arg, command_int, (const char*) argument_str, label_array);
@@ -144,9 +154,10 @@ int argument_identify (int count_of_arg, int command_int, const char* argument_s
                 command_int <= 35)
                 return register_num(argument_str);
 
-            if (command_int >= 64 &&                                 // CMD_JMP = 64, CMD_JB  = 65, CMD_JBE = 66 
-                command_int <= 70)                                   // CMD_JA  = 67, CMD_JAE = 68, CMD_JE  = 69, CMD_JNE = 70
+            if (command_int >= 64 &&                                  // CMD_JMP = 64, CMD_JB  = 65, CMD_JBE = 66 
+                command_int <= 70)  {                                 // CMD_JA  = 67, CMD_JAE = 68, CMD_JE  = 69, CMD_JNE = 70
                 return identify_label(argument_str, label_array);
+            }
 
             return atoi(argument_str);
 
@@ -212,18 +223,33 @@ int* fill_label_array (char** pointers_array, size_t count_of_lines, int* label_
 int identify_label (const char* argument_str, int* label_array) {
     assert(argument_str);
 
-    int label_number = atoi(argument_str + 1);
+    int argument_int = 0;
 
-    if (label_number < 0 ||
-        label_number > 9) 
+    if (*argument_str == ':') 
     {
-        fprintf(stderr, "Incorrect label");
-        return -1;
+        int label_number = atoi(argument_str + 1);
+
+        if (label_number < 0 ||
+            label_number > 9) 
+        {
+            fprintf(stderr, "Incorrect label");
+            return -1;
+        }
+
+        argument_int = label_array[label_number];
     }
 
-    int argument_int = label_array[label_number];
+    else
+        argument_int = atoi(argument_str);
 
     return argument_int;
 }
 
+int is_label(char* string) {
+    assert(string);
 
+    if ( *(string + 1) == ':')
+        return 1;
+
+    return 0;
+}

@@ -14,7 +14,7 @@ size_t str_change_char       (char*  asm_code_buf,   char  original_char_code, c
 
 char** fill_point_ar         (char** pointers_array, char* asm_code_buf,       size_t count_of_lines);
 
-void   fprint_byte_code      (FILE*  output_file,    int*  byte_code_buf,      size_t byte_code_capacity);
+void   fprint_byte_code      (FILE*  output_file,    int*  byte_code_buf,      size_t count_of_lines);
 
 int    my_strcmp             (const char* str1,      const char* str2);
 

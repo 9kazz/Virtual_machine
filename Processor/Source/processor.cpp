@@ -111,7 +111,7 @@ void processor(CalcStruct* calc_struct) {
             }
 
             default:
-                fprintf(stderr, "Calculator: unknown arifmetic command");
+                fprintf(stderr, "Processor: unknown arifmetic command");
                 break;
         }
         ind += 2;
