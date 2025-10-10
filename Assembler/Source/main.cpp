@@ -15,13 +15,15 @@ int main() {
     assert(input_file);
     assert(output_file);
 
-    size_t count_of_lines = 0;
-    char** pointers_array = create_pointers_array(input_file, &count_of_lines);
+    asm_sruct Assembler;
+        Assembler.count_of_commands = 0;
+        Assembler.byte_code_buf     = NULL;
 
-    size_t byte_code_capacity = 0;
-    int* byte_code_buf = assembler (pointers_array, &count_of_lines, &byte_code_capacity);
+    char** pointers_array = create_pointers_array(input_file, &(Assembler.count_of_commands));
+
+    Assembler.byte_code_buf = assembler (pointers_array, &Assembler);
     
-    fprint_byte_code(output_file, byte_code_buf, count_of_lines);
+    fprint_byte_code(output_file, Assembler);
 
     // size_t el_num = 0;
     // while (el_num < 10) 

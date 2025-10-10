@@ -9,73 +9,70 @@
 #include "assembler.h"
 #include "utils.h"
 
-int* assembler (char** pointers_array, size_t* count_of_lines, size_t* byte_code_capacity) {
+int* assembler (char** pointers_array, asm_sruct* Assembler) {
     assert(pointers_array);
-    assert(fill_byte_code_buf);
+    assert(Assembler);
 
-    *byte_code_capacity = 2 * (*count_of_lines);
+    size_t byte_code_capacity = 2 * (Assembler -> count_of_commands);
 
-    int* byte_code_buf = (int*) calloc(*byte_code_capacity, sizeof(byte_code_buf[0])); //??
+    SAFE_CALLOC(byte_code_pointer, byte_code_capacity, int)
 
-    int* label_array = create_label_array();
+    SAFE_CALLOC(label_array, LABEL_BUF_SIZE, int)
 
-    fill_label_array(pointers_array, *count_of_lines, label_array);
-
-    fill_byte_code_buf (pointers_array, count_of_lines, byte_code_buf, label_array);  // TODO: обработка ошибок
-
+    size_t count_of_commands_without_labels = fill_byte_code_buf (pointers_array, Assembler, byte_code_pointer, label_array); // 1st compilation
+                                              fill_byte_code_buf (pointers_array, Assembler, byte_code_pointer, label_array); // 2nd one with lables
+    
     free(label_array);
 
-    return byte_code_buf;
+    if (count_of_commands_without_labels == 0) {
+        fprintf(stderr, "fill_byte_code_buf: error");
+        return byte_code_pointer;
+    }
+
+    Assembler -> count_of_commands = count_of_commands_without_labels;
+
+    return byte_code_pointer;
 }
 
-int* fill_byte_code_buf (char** pointers_array, size_t* count_of_lines, int* byte_code_buf, int* label_array) {  // TODO: возврат ошибок
+size_t fill_byte_code_buf (char** pointers_array, asm_sruct* Assembler, int* byte_code_pointer, int* label_array) {
     assert(pointers_array);
-    assert(byte_code_buf);
+    assert(Assembler);
 
     char command_str [COMMAND_MAX_LEN] = {0}; 
     char argument_str[COMMAND_MAX_LEN] = {0};
 
-    size_t str_num         = 0;
+    size_t cmd_num         = 0;
     size_t byte_code_index = 0;
     int    count_of_arg    = 0;
 
-    size_t count_of_commands = *count_of_lines;
+    size_t count_of_commands_before_change = Assembler -> count_of_commands;
 
-    while (str_num < count_of_commands && 
-           pointers_array[str_num] != NULL) 
+    while (cmd_num < count_of_commands_before_change && 
+           pointers_array[cmd_num] != NULL) 
     {
-        count_of_arg = sscanf( (const char*) pointers_array[str_num], "%32s %32s", command_str, argument_str); // COMMAND_MAX_LEN = 32
+        count_of_arg = sscanf( (const char*) pointers_array[cmd_num], "%32s %32s", command_str, argument_str); // COMMAND_MAX_LEN = 32
 
-        if (is_label(command_str)) {
-            --(*count_of_lines);
-            ++str_num;
+        int label_check = fill_label_array(command_str, Assembler, &cmd_num, label_array);
+        if (label_check == IS_LABEL)
             continue;
-        }
 
         int  command_int = command_identify( (const char*) command_str); // TODO: UNKNOW_COM err analise
         int argument_int = argument_identify(count_of_arg, command_int, (const char*) argument_str, label_array);
 
-        switch (count_of_arg)
+        if (count_of_arg != 1 &&
+            count_of_arg != 2 ) 
         {
-            case 1:  // one argument
-                argument_int = POISON;
-                break;
-
-            case 2: // two arguments
-                break;
-
-            default:
-                fprintf(stderr, "Incorrect ASM-code");
-                return NULL;       
+            fprintf(stderr, "Incorrect ASM-code");
+            return 0;
         }
 
-        byte_code_buf[ byte_code_index++ ] = command_int;
-        byte_code_buf[ byte_code_index++ ] = argument_int;
+        byte_code_pointer[ byte_code_index++ ] = command_int;
+        byte_code_pointer[ byte_code_index++ ] = argument_int;
 
-        ++str_num;
+        ++cmd_num;
     }
 
-    return byte_code_buf;
+    return Assembler -> count_of_commands;
 }
 
 int command_identify (const char* command_str) {
@@ -150,7 +147,7 @@ int argument_identify (int count_of_arg, int command_int, const char* argument_s
 
         case 2: // two arguments
 
-            if (command_int >= 33 &&                                 // CMD_PUSHR = 33, CMD_POPR = 34, CMD_IN = 35
+            if (command_int >= 33 &&                                  // CMD_PUSHR = 33, CMD_POPR = 34, CMD_IN = 35
                 command_int <= 35)
                 return register_num(argument_str);
 
@@ -186,38 +183,24 @@ int register_num (const char* argument_str) {
     return offset_from_first_reg;
 }
 
-int* create_label_array (void) {
-
-    int* label_array = (int*) calloc(LABEL_BUF_SIZE, sizeof(int));
-
-    if (label_array == NULL) {
-        fprintf(stderr, "create_label_array: Allocation error");
-        return label_array;
-    }
-    
-    return label_array;
-}
-
-int* fill_label_array (char** pointers_array, size_t count_of_lines, int* label_array) {
-    assert(pointers_array);
+int fill_label_array (char* command_str, asm_sruct* Assembler, size_t* cmd_num, int* label_array) {
+    assert(command_str);
+    assert(Assembler);
+    assert(cmd_num);
     assert(label_array);
 
-    int    label    = 0;
-    size_t line_num = 0;
+    if (is_label(command_str)) {
 
-    while (line_num < count_of_lines && 
-           pointers_array[line_num] != NULL)
-    {
-        if ( * (pointers_array[line_num] + 1) == ':') 
-        {
-            label = *pointers_array[line_num] - '0';
-            label_array[label] = line_num + 1;
-        }
+        int label = *command_str - '0';
+        label_array[label] = *cmd_num + 1;
 
-        ++line_num;
+        --(Assembler -> count_of_commands);
+        ++(*cmd_num);      
+              
+        return IS_LABEL;
     }
 
-    return label_array;
+    return NOT_LABEL;
 }
 
 int identify_label (const char* argument_str, int* label_array) {
@@ -230,10 +213,10 @@ int identify_label (const char* argument_str, int* label_array) {
         int label_number = atoi(argument_str + 1);
 
         if (label_number < 0 ||
-            label_number > 9) 
+            label_number > LABEL_BUF_SIZE - 1) 
         {
             fprintf(stderr, "Incorrect label");
-            return -1;
+            return NOT_LABEL;
         }
 
         argument_int = label_array[label_number];

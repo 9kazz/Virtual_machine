@@ -93,16 +93,16 @@ char** fill_point_ar (char** pointers_array, char* asm_code_buf, size_t count_of
 }
 
 
-void fprint_byte_code (FILE* output_file, int* byte_code_buf, size_t count_of_lines) {
+void fprint_byte_code (FILE* output_file, asm_sruct Assembler) {
     
-    size_t byte_code_size = 2 * count_of_lines;
+    size_t byte_code_size = 2 * Assembler.count_of_commands;
 
     size_t el_num = 0;
 
     while (el_num < byte_code_size) 
     {
-        fprintf(output_file, "%d\t", byte_code_buf[ el_num++ ]);
-        fprintf(output_file, "%d\n", byte_code_buf[ el_num++ ]);
+        fprintf(output_file, "%d\t", Assembler.byte_code_buf[ el_num++ ]);
+        fprintf(output_file, "%d\n", Assembler.byte_code_buf[ el_num++ ]);
     }
 }
 

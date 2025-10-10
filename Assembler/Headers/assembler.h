@@ -1,8 +1,14 @@
 #ifndef ASSEMBLER_H
 #define ASSEMBLER_H
 
-enum errors {
-    UNKNOWN_COM = -1
+#include <stdio.h>
+#include "utils.h"
+
+enum function_status {
+    END_SUCCESS = 1,
+    UNKNOWN_COM = -1,
+    NOT_LABEL   = -2,
+    IS_LABEL    =  2
 };
 
 enum commands {
@@ -31,17 +37,16 @@ const int COMMAND_MAX_LEN  = 32;
 const int COUNT_OF_REG     =  8;
 const int LABEL_BUF_SIZE   = 10;
 
-int* assembler          (char**      pointers_array, size_t* count_of_lines, size_t*     byte_code_capacity);
-int* fill_byte_code_buf (char**     pointers_array,  size_t* count_of_lines, int*        byte_code_buf,       int* label_array);
-int  command_identify   (const char* command_str);
-int  argument_identify  (int         count_of_arg,   int     command_int,    const char* argument_str,        int* label_array);
+int*   assembler          (char**      pointers_array, asm_sruct* Assembler);
+size_t fill_byte_code_buf (char**      pointers_array, asm_sruct* Assembler, int*    byte_code_pointer, int* label_array);
+int    command_identify   (const char* command_str);
+int    argument_identify  (int         count_of_arg,   int command_int,       const char* argument_str,  int* label_array);
 
-int  register_num       (const char* argument_str);
+int    register_num       (const char* argument_str);
 
-int* create_label_array (void);
-int* fill_label_array   (char**      pointers_array, size_t  count_of_lines, int* label_array);
-int  identify_label     (const char* argument_str,   int*    label_array);
-int  is_label           (char* string);
+int    fill_label_array   (char*       command_str,  asm_sruct* Assembler,   size_t* cmd_num,   int* label_array);
+int    identify_label     (const char* argument_str, int*        label_array);
+int    is_label           (char*       string);
 
 
 #endif
