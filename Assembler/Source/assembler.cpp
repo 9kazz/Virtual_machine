@@ -20,7 +20,10 @@ int* assembler (char** pointers_array, asm_sruct* Assembler) {
     SAFE_CALLOC(label_array, LABEL_BUF_SIZE, int)
 
     size_t count_of_commands_without_labels = fill_byte_code_buf (pointers_array, Assembler, byte_code_pointer, label_array); // 1st compilation
-                                              fill_byte_code_buf (pointers_array, Assembler, byte_code_pointer, label_array); // 2nd one with lables
+
+    listing_labeles_array(stdout, label_array);
+    
+    fill_byte_code_buf (pointers_array, Assembler, byte_code_pointer, label_array); // 2nd compilation with lables
     
     free(label_array);
 
@@ -52,22 +55,27 @@ size_t fill_byte_code_buf (char** pointers_array, asm_sruct* Assembler, int* byt
     {
         count_of_arg = sscanf( (const char*) pointers_array[cmd_num], "%32s %32s", command_str, argument_str); // COMMAND_MAX_LEN = 32
 
+        if (count_of_arg == 0) {
+            fprintf(stderr, "Incorrect ASM-code");
+            return 0;
+
+        } else if (count_of_arg == 1) {
+            *argument_str = '\0';
+        }
+
         int label_check = fill_label_array(command_str, Assembler, &cmd_num, label_array);
         if (label_check == IS_LABEL)
             continue;
 
-        int  command_int = command_identify( (const char*) command_str); // TODO: UNKNOW_COM err analise
+        int  command_int = command_identify( (const char*) command_str);
         int argument_int = argument_identify(count_of_arg, command_int, (const char*) argument_str, label_array);
-
-        if (count_of_arg != 1 &&
-            count_of_arg != 2 ) 
-        {
-            fprintf(stderr, "Incorrect ASM-code");
-            return 0;
-        }
 
         byte_code_pointer[ byte_code_index++ ] = command_int;
         byte_code_pointer[ byte_code_index++ ] = argument_int;
+
+        listing_byte_code(stdout,      cmd_num,
+                          command_str, argument_str,
+                          command_int, argument_int);
 
         ++cmd_num;
     }
@@ -192,7 +200,9 @@ int fill_label_array (char* command_str, asm_sruct* Assembler, size_t* cmd_num, 
     if (is_label(command_str)) {
 
         int label = *command_str - '0';
-        label_array[label] = *cmd_num + 1;
+
+        int byte_code_ind = 2 * (*cmd_num);
+        label_array[label] = byte_code_ind;
 
         --(Assembler -> count_of_commands);
         ++(*cmd_num);      
@@ -206,7 +216,7 @@ int fill_label_array (char* command_str, asm_sruct* Assembler, size_t* cmd_num, 
 int identify_label (const char* argument_str, int* label_array) {
     assert(argument_str);
 
-    int argument_int = 0;
+    int argument_int    = 0;
 
     if (*argument_str == ':') 
     {

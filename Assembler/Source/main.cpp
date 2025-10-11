@@ -31,6 +31,8 @@ int main() {
     //     fprintf(stdout, "%d\t", label_array[el_num]);
     // }
 
+    free(pointers_array);
+
     fclose(input_file);
     fclose(output_file);
 

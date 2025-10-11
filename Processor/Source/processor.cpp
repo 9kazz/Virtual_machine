@@ -18,7 +18,7 @@ void processor(CalcStruct* calc_struct) {
 
     size_t bite_code_size =   calc_struct -> bite_code.size;
     int*   bite_code_buf  =   calc_struct -> bite_code.buffer;
-    stack_struct* stack   = &(calc_struct -> calc_stack);
+    stack_struct*  stack  = &(calc_struct -> calc_stack);
 
     size_t ind = 0;
 
@@ -26,6 +26,7 @@ void processor(CalcStruct* calc_struct) {
            bite_code_buf[ind] != CMD_HLT) 
     {
         int arif_operator = bite_code_buf[ind];
+        
         switch(arif_operator)
         {
             case CMD_PUSH:
@@ -114,8 +115,11 @@ void processor(CalcStruct* calc_struct) {
                 fprintf(stderr, "Processor: unknown arifmetic command");
                 break;
         }
+
         ind += 2;
     }
+
+    return;
 }
 
 int Stack_Calc (stack_struct* stack, int arif_operator) {
@@ -228,6 +232,9 @@ int Jump_##func_name (size_t* stack_ind, int cmd_num, stack_struct* stack) {   \
                                                                                \
     if (num1 operator num2)                                                    \
         Jump_to_JMP(stack_ind, cmd_num);                                       \
+                                                                               \
+    else                                                                       \
+        *stack_ind += 2;                                                       \
                                                                                \
     return SUCCESS;                                                            \
 }
