@@ -95,7 +95,7 @@ char** fill_point_ar (char** pointers_array, char* asm_code_buf, size_t count_of
 
 void fprint_byte_code (FILE* output_file, asm_sruct Assembler) {
     
-    size_t byte_code_size = 2 * Assembler.count_of_commands;
+    size_t byte_code_size = 2 * Assembler.count_of_commands; // each command has argument (it can be fictive (POISON))
 
     size_t el_num = 0;
 
@@ -116,7 +116,7 @@ void listing_byte_code (FILE* listing_file, size_t cmd_num,
     fprintf(listing_file, "%8s %8s \t",   command_str,       argument_str);
 
     if (argument_int == POISON)
-        fprintf(listing_file, "%8d %8s\n", command_int, "POISON");
+        fprintf(listing_file, "%8d %8s\n", command_int, "POISON"); // each command has argument (it can be fictive (POISON))
 
     else                    
         fprintf(listing_file, "%8d %8d\n", command_int,  argument_int);

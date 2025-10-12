@@ -14,7 +14,7 @@
 #include "stack.h"
 #include "utils.h"
 
-void processor(CalcStruct* calc_struct) {
+void processor(CalcStruct* calc_struct) { // each command has argument (it can be fictive (POISON))
 
     size_t bite_code_size =   calc_struct -> bite_code.size;
     int*   bite_code_buf  =   calc_struct -> bite_code.buffer;
@@ -116,7 +116,7 @@ void processor(CalcStruct* calc_struct) {
                 break;
         }
 
-        ind += 2;
+        ind += 2; // each command has argument (it can be fictive (POISON))
     }
 
     return;

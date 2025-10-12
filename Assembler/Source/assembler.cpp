@@ -13,17 +13,17 @@ int* assembler (char** pointers_array, asm_sruct* Assembler) {
     assert(pointers_array);
     assert(Assembler);
 
-    size_t byte_code_capacity = 2 * (Assembler -> count_of_commands);
+    size_t byte_code_capacity = 2 * (Assembler -> count_of_commands); // each command has argument (it can be fictive (POISON))
 
     SAFE_CALLOC(byte_code_pointer, byte_code_capacity, int)
 
     SAFE_CALLOC(label_array, LABEL_BUF_SIZE, int)
 
-    size_t count_of_commands_without_labels = fill_byte_code_buf (pointers_array, Assembler, byte_code_pointer, label_array); // 1st compilation
+    size_t count_of_commands_without_labels = fill_byte_code_buf (pointers_array, *Assembler, byte_code_pointer, label_array); // 1st compilation
 
     listing_labeles_array(stdout, label_array);
     
-    fill_byte_code_buf (pointers_array, Assembler, byte_code_pointer, label_array); // 2nd compilation with lables
+    fill_byte_code_buf (pointers_array, *Assembler, byte_code_pointer, label_array); // 2nd compilation with lables
     
     free(label_array);
 
@@ -37,9 +37,8 @@ int* assembler (char** pointers_array, asm_sruct* Assembler) {
     return byte_code_pointer;
 }
 
-size_t fill_byte_code_buf (char** pointers_array, asm_sruct* Assembler, int* byte_code_pointer, int* label_array) {
+size_t fill_byte_code_buf (char** pointers_array, asm_sruct Assembler, int* byte_code_pointer, int* label_array) {
     assert(pointers_array);
-    assert(Assembler);
 
     char command_str [COMMAND_MAX_LEN] = {0}; 
     char argument_str[COMMAND_MAX_LEN] = {0};
@@ -48,9 +47,9 @@ size_t fill_byte_code_buf (char** pointers_array, asm_sruct* Assembler, int* byt
     size_t byte_code_index = 0;
     int    count_of_arg    = 0;
 
-    size_t count_of_commands_before_change = Assembler -> count_of_commands;
+    size_t count_of_commands_without_labeles = Assembler.count_of_commands;
 
-    while (cmd_num < count_of_commands_before_change && 
+    while (cmd_num < Assembler.count_of_commands && 
            pointers_array[cmd_num] != NULL) 
     {
         count_of_arg = sscanf( (const char*) pointers_array[cmd_num], "%32s %32s", command_str, argument_str); // COMMAND_MAX_LEN = 32
@@ -63,11 +62,11 @@ size_t fill_byte_code_buf (char** pointers_array, asm_sruct* Assembler, int* byt
             *argument_str = '\0';
         }
 
-        int label_check = fill_label_array(command_str, Assembler, &cmd_num, label_array);
+        int label_check = fill_label_array(command_str, &count_of_commands_without_labeles, &cmd_num, label_array);
         if (label_check == IS_LABEL)
             continue;
 
-        int  command_int = command_identify( (const char*) command_str);
+        int  command_int = command_identify( (const char*) command_str); // each command has argument (it can be fictive (POISON))
         int argument_int = argument_identify(count_of_arg, command_int, (const char*) argument_str, label_array);
 
         byte_code_pointer[ byte_code_index++ ] = command_int;
@@ -80,7 +79,7 @@ size_t fill_byte_code_buf (char** pointers_array, asm_sruct* Assembler, int* byt
         ++cmd_num;
     }
 
-    return Assembler -> count_of_commands;
+    return count_of_commands_without_labeles;
 }
 
 int command_identify (const char* command_str) {
@@ -150,7 +149,7 @@ int argument_identify (int count_of_arg, int command_int, const char* argument_s
     switch (count_of_arg)
     {
         case 1:  // one argument
-            return POISON;
+            return POISON;   // each command has argument (it can be fictive (POISON))
             break;
 
         case 2: // two arguments
@@ -191,9 +190,9 @@ int register_num (const char* argument_str) {
     return offset_from_first_reg;
 }
 
-int fill_label_array (char* command_str, asm_sruct* Assembler, size_t* cmd_num, int* label_array) {
+int fill_label_array (char* command_str, size_t* count_of_commands_without_labeles, size_t* cmd_num, int* label_array) {
     assert(command_str);
-    assert(Assembler);
+    assert(count_of_commands_without_labeles);
     assert(cmd_num);
     assert(label_array);
 
@@ -204,7 +203,7 @@ int fill_label_array (char* command_str, asm_sruct* Assembler, size_t* cmd_num, 
         int byte_code_ind = 2 * (*cmd_num);
         label_array[label] = byte_code_ind;
 
-        --(Assembler -> count_of_commands);
+        --(*count_of_commands_without_labeles);
         ++(*cmd_num);      
               
         return IS_LABEL;
@@ -233,7 +232,7 @@ int identify_label (const char* argument_str, int* label_array) {
     }
 
     else
-        argument_int = atoi(argument_str);
+        argument_int = 2 * (atoi(argument_str) - 1);
 
     return argument_int;
 }
