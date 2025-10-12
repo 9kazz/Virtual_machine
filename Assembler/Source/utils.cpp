@@ -106,14 +106,12 @@ void fprint_byte_code (FILE* output_file, asm_sruct Assembler) {
     }
 }
 
-void listing_byte_code (FILE* listing_file, size_t cmd_num,
+void listing_byte_code (FILE* listing_file, asm_sruct Assembler,
                         char* command_str,  char*  argument_str,
                         int   command_int,  int    argument_int) {
 
-    size_t byte_code_cmd_ind = 2 * cmd_num;
-
-    fprintf(listing_file, "[%3d] [%3d] \t",   byte_code_cmd_ind, byte_code_cmd_ind + 1);
-    fprintf(listing_file, "%8s %8s \t",   command_str,       argument_str);
+    fprintf(listing_file, "[%3d] [%3d] \t",   Assembler.ind_counter - 2, Assembler.ind_counter - 1);
+    fprintf(listing_file, "%8s %8s \t",       command_str,                  argument_str);
 
     if (argument_int == POISON)
         fprintf(listing_file, "%8d %8s\n", command_int, "POISON"); // each command has argument (it can be fictive (POISON))

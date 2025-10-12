@@ -6,6 +6,7 @@
 struct asm_sruct {
     int*   byte_code_buf;
     size_t count_of_commands;
+    size_t ind_counter;
 };
 
 char** create_pointers_array (FILE* file_input,       size_t* count_of_lines);
@@ -20,9 +21,9 @@ char** fill_point_ar         (char** pointers_array, char* asm_code_buf,       s
 
 void   fprint_byte_code      (FILE*  output_file,    asm_sruct Assembler);
 
-void   listing_byte_code     (FILE* listing_file, size_t cmd_num,
-                              char* command_str,  char*  argument_str,
-                              int   command_int,  int    argument_int);
+void   listing_byte_code     (FILE* listing_file, asm_sruct Assembler,
+                              char* command_str,  char*     argument_str,
+                              int   command_int,  int       argument_int);
 
 void listing_labeles_array   (FILE* listing_file, int*   label_array);        
 

@@ -18,6 +18,7 @@ int main() {
     asm_sruct Assembler;
         Assembler.count_of_commands = 0;
         Assembler.byte_code_buf     = NULL;
+        Assembler.ind_counter       = 0;
 
     char** pointers_array = create_pointers_array(input_file, &(Assembler.count_of_commands));
 

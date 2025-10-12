@@ -19,11 +19,12 @@ int* assembler (char** pointers_array, asm_sruct* Assembler) {
 
     SAFE_CALLOC(label_array, LABEL_BUF_SIZE, int)
 
-    size_t count_of_commands_without_labels = fill_byte_code_buf (pointers_array, *Assembler, byte_code_pointer, label_array); // 1st compilation
+    size_t count_of_commands_without_labels = fill_byte_code_buf (pointers_array, Assembler, byte_code_pointer, label_array); // 1st compilation
+    Assembler -> ind_counter = 0;
 
     listing_labeles_array(stdout, label_array);
     
-    fill_byte_code_buf (pointers_array, *Assembler, byte_code_pointer, label_array); // 2nd compilation with lables
+    fill_byte_code_buf (pointers_array, Assembler, byte_code_pointer, label_array); // 2nd compilation with lables
     
     free(label_array);
 
@@ -37,19 +38,18 @@ int* assembler (char** pointers_array, asm_sruct* Assembler) {
     return byte_code_pointer;
 }
 
-size_t fill_byte_code_buf (char** pointers_array, asm_sruct Assembler, int* byte_code_pointer, int* label_array) {
+size_t fill_byte_code_buf (char** pointers_array, asm_sruct* Assembler, int* byte_code_pointer, int* label_array) {
     assert(pointers_array);
 
     char command_str [COMMAND_MAX_LEN] = {0}; 
     char argument_str[COMMAND_MAX_LEN] = {0};
 
     size_t cmd_num         = 0;
-    size_t byte_code_index = 0;
     int    count_of_arg    = 0;
 
-    size_t count_of_commands_without_labeles = Assembler.count_of_commands;
+    size_t count_of_commands_without_labeles = Assembler -> count_of_commands;
 
-    while (cmd_num < Assembler.count_of_commands && 
+    while (cmd_num < Assembler -> count_of_commands && 
            pointers_array[cmd_num] != NULL) 
     {
         count_of_arg = sscanf( (const char*) pointers_array[cmd_num], "%32s %32s", command_str, argument_str); // COMMAND_MAX_LEN = 32
@@ -69,10 +69,10 @@ size_t fill_byte_code_buf (char** pointers_array, asm_sruct Assembler, int* byte
         int  command_int = command_identify( (const char*) command_str); // each command has argument (it can be fictive (POISON))
         int argument_int = argument_identify(count_of_arg, command_int, (const char*) argument_str, label_array);
 
-        byte_code_pointer[ byte_code_index++ ] = command_int;
-        byte_code_pointer[ byte_code_index++ ] = argument_int;
+        byte_code_pointer[ Assembler -> ind_counter ++ ] = command_int;
+        byte_code_pointer[ Assembler -> ind_counter ++ ] = argument_int;
 
-        listing_byte_code(stdout,      cmd_num,
+        listing_byte_code(stdout,     *Assembler,
                           command_str, argument_str,
                           command_int, argument_int);
 
