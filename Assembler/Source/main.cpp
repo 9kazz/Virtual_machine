@@ -15,7 +15,7 @@ int main() {
     assert(input_file);
     assert(output_file);
 
-    asm_sruct Assembler;
+    asm_struct Assembler;
         Assembler.count_of_commands = 0;
         Assembler.byte_code_buf     = NULL;
         Assembler.ind_counter       = 0;

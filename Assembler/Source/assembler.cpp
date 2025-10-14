@@ -9,7 +9,7 @@
 #include "assembler.h"
 #include "utils.h"
 
-int* assembler (char** pointers_array, asm_sruct* Assembler) {
+int* assembler (char** pointers_array, asm_struct* Assembler) {
     assert(pointers_array);
     assert(Assembler);
 
@@ -38,7 +38,7 @@ int* assembler (char** pointers_array, asm_sruct* Assembler) {
     return byte_code_pointer;
 }
 
-size_t fill_byte_code_buf (char** pointers_array, asm_sruct* Assembler, int* byte_code_pointer, int* label_array) {
+size_t fill_byte_code_buf (char** pointers_array, asm_struct* Assembler, int* byte_code_pointer, int* label_array) {
     assert(pointers_array);
 
     char command_str [COMMAND_MAX_LEN] = {0}; 
@@ -62,9 +62,11 @@ size_t fill_byte_code_buf (char** pointers_array, asm_sruct* Assembler, int* byt
             *argument_str = '\0';
         }
 
-        int label_check = fill_label_array(command_str, &count_of_commands_without_labeles, &cmd_num, label_array);
-        if (label_check == IS_LABEL)
+        int label_check = fill_label_array(command_str, &count_of_commands_without_labeles, *Assembler, label_array);
+        if (label_check == IS_LABEL) {
+            ++cmd_num;      
             continue;
+        }
 
         int  command_int = command_identify( (const char*) command_str); // each command has argument (it can be fictive (POISON))
         int argument_int = argument_identify(count_of_arg, command_int, (const char*) argument_str, label_array);
@@ -190,21 +192,18 @@ int register_num (const char* argument_str) {
     return offset_from_first_reg;
 }
 
-int fill_label_array (char* command_str, size_t* count_of_commands_without_labeles, size_t* cmd_num, int* label_array) {
+int fill_label_array (char* command_str, size_t* count_of_commands_without_labeles, asm_struct Assembler, int* label_array) {
     assert(command_str);
     assert(count_of_commands_without_labeles);
-    assert(cmd_num);
     assert(label_array);
 
     if (is_label(command_str)) {
 
         int label = *command_str - '0';
 
-        int byte_code_ind = 2 * (*cmd_num);
-        label_array[label] = byte_code_ind;
+        label_array[label] = Assembler.ind_counter;
 
         --(*count_of_commands_without_labeles);
-        ++(*cmd_num);      
               
         return IS_LABEL;
     }

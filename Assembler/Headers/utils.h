@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-struct asm_sruct {
+struct asm_struct {
     int*   byte_code_buf;
     size_t count_of_commands;
     size_t ind_counter;
@@ -19,9 +19,9 @@ size_t str_change_char       (char*  asm_code_buf,   char  original_char_code, c
 
 char** fill_point_ar         (char** pointers_array, char* asm_code_buf,       size_t count_of_lines);
 
-void   fprint_byte_code      (FILE*  output_file,    asm_sruct Assembler);
+void   fprint_byte_code      (FILE*  output_file,    asm_struct Assembler);
 
-void   listing_byte_code     (FILE* listing_file, asm_sruct Assembler,
+void   listing_byte_code     (FILE* listing_file, asm_struct Assembler,
                               char* command_str,  char*     argument_str,
                               int   command_int,  int       argument_int);
 

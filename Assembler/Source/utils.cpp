@@ -93,7 +93,7 @@ char** fill_point_ar (char** pointers_array, char* asm_code_buf, size_t count_of
 }
 
 
-void fprint_byte_code (FILE* output_file, asm_sruct Assembler) {
+void fprint_byte_code (FILE* output_file, asm_struct Assembler) {
     
     size_t byte_code_size = 2 * Assembler.count_of_commands; // each command has argument (it can be fictive (POISON))
 
@@ -106,7 +106,7 @@ void fprint_byte_code (FILE* output_file, asm_sruct Assembler) {
     }
 }
 
-void listing_byte_code (FILE* listing_file, asm_sruct Assembler,
+void listing_byte_code (FILE* listing_file, asm_struct Assembler,
                         char* command_str,  char*  argument_str,
                         int   command_int,  int    argument_int) {
 
