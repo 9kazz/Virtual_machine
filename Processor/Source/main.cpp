@@ -25,15 +25,17 @@ int main() {
 
     CALC_CTOR(calc_struct)
 
+    // printf("cmd_info_arr:\n");
     // for (size_t i = 0; i < MAX_COUNT_OF_CMD; i++)
     //     printf("%s \t %d \n", calc_struct.cmd_info_arr[i].name, calc_struct.cmd_info_arr[i].code);
 
     processor(&calc_struct);
 
+    printf("calc_stack:\n");
     for (size_t i = 0; i < calc_struct.calc_stack.cur_position; i++)
         printf("%d\n", calc_struct.calc_stack.data[i]);
     
-    // printf("\n");
+    // printf("register_buf:\n");
     // for (size_t i = 0; i < COUNT_OF_REG; i++)
     //     printf("%d\n", calc_struct.register_buf[i]);
 

@@ -105,7 +105,8 @@ struct CalcStruct {
 
                             /*FUNCTIONS*/
 
-CmdStruct* create_cmd_info_arr(void);
+CmdStruct* create_cmd_info_arr (void);
+CmdStruct* find_cmd_in_arr     (CalcStruct* calc_struct, int code_of_cmd);
 
 int*   create_bite_code_buf (FILE* input_file, size_t* bite_code_size);
 

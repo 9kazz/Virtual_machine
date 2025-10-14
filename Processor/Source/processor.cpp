@@ -16,85 +16,14 @@
 
 void processor(CalcStruct* calc_struct) { // each command has argument (it can be fictive (POISON))
 
-    while (calc_struct -> ind_counter < calc_struct -> bite_code.size &&
-           calc_struct -> bite_code.buffer[calc_struct -> ind_counter] != CMD_HLT) 
+    while (calc_struct -> ind_counter  <  calc_struct -> bite_code.size &&
+           calc_struct -> bite_code.buffer[calc_struct -> ind_counter]  !=  CMD_HLT) 
     {
-        int arif_operator = calc_struct -> bite_code.buffer[calc_struct -> ind_counter];
+        int code_of_cmd = calc_struct -> bite_code.buffer[calc_struct -> ind_counter];
         
-        switch(arif_operator)
-        {
-            case CMD_PUSH:
-                Stack_Push_Proc(calc_struct);
-                break;
+        CmdStruct* info_of_cmd = find_cmd_in_arr(calc_struct, code_of_cmd);
 
-            case CMD_OUT: 
-                Stack_Pop_Proc(calc_struct);
-                break;
-
-            case CMD_ADD: 
-                Stack_Arif_Add(calc_struct);
-                break;
-
-            case CMD_SUB: 
-                Stack_Arif_Sub(calc_struct);
-                break;
-            
-            case CMD_MUL: 
-                Stack_Arif_Mul(calc_struct);
-                break;
-
-            case CMD_DIV: 
-                Stack_Arif_Div(calc_struct);
-                break;
-
-            case CMD_SQRT:
-                Stack_Arif_Sqrt(calc_struct);
-                break;            
-
-            case CMD_PUSHR:
-                Stack_PushR(calc_struct);
-                break;
-
-            case CMD_POPR:
-                Stack_PopR(calc_struct);
-                break;
-
-            case CMD_IN:
-                Stack_In(calc_struct);
-                break;
-
-            case CMD_JMP:
-                Jump_to_JMP(calc_struct);
-                continue;
-
-            case CMD_JB:
-                Jump_Below_JB(calc_struct);
-                continue;
-
-            case CMD_JBE:
-                Jump_Below_Equal_JBE(calc_struct);
-                continue;
-
-            case CMD_JA:
-                Jump_Above_JA(calc_struct);
-                continue;
-
-            case CMD_JAE:
-                Jump_Above_Equal_JAE(calc_struct);
-                continue;
-
-            case CMD_JE:
-                Jump_Equal_JE(calc_struct);
-                continue;
-
-            case CMD_JNE:
-                Jump_Not_Equal_JNE(calc_struct);
-                continue;
-
-            default:
-                fprintf(stderr, "Processor: unknown arifmetic command");
-                break;
-        }
+        info_of_cmd -> cmd_func(calc_struct);
 
         calc_struct -> ind_counter += 2; // each command has argument (it can be fictive (POISON))
     }
@@ -216,11 +145,10 @@ CalcErr_t Jump_##func_name (CalcStruct* calc_struct) {                          
     int num1 = calc_struct -> calc_stack.data[calc_struct -> calc_stack.cur_position - 2];  \
     int num2 = calc_struct -> calc_stack.data[calc_struct -> calc_stack.cur_position - 1];  \
                                                                                             \
-    if (num1 operator num2)                                                                 \
+    if (num1 operator num2) {                                                               \
         Jump_to_JMP(calc_struct);                                                           \
-                                                                                            \
-    else                                                                                    \
-        calc_struct -> ind_counter += 2;                                                    \
+        calc_struct -> ind_counter -= 2;                                                    \
+    }                                                                                       \
                                                                                             \
     return SUCCESS;                                                                         \
 }
