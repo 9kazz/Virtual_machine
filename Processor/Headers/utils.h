@@ -50,6 +50,11 @@ struct CalcStruct {
     size_t         ind_counter;
 };
 
+// struct CmdStruct {
+//     const char* name;
+//     int         code;
+//     int (*func) (CalcStruct*);
+// };
 
 #define CALC_CTOR(name)                                                                        \
     size_t name##_bite_code_size = 0;                                                          \

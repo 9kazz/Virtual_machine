@@ -31,9 +31,25 @@ void processor(CalcStruct* calc_struct) { // each command has argument (it can b
                 Stack_Pop_Proc(calc_struct);
                 break;
 
-            case CMD_ADD: case CMD_SUB: case CMD_MUL: case CMD_DIV: case CMD_SQRT:
-                Stack_Calc(&(calc_struct -> calc_stack), arif_operator);
+            case CMD_ADD: 
+                Stack_Arif_Add(calc_struct);
                 break;
+
+            case CMD_SUB: 
+                Stack_Arif_Sub(calc_struct);
+                break;
+            
+            case CMD_MUL: 
+                Stack_Arif_Mul(calc_struct);
+                break;
+
+            case CMD_DIV: 
+                Stack_Arif_Div(calc_struct);
+                break;
+
+            case CMD_SQRT:
+                Stack_Arif_Sqrt(calc_struct);
+                break;            
 
             case CMD_PUSHR:
                 Stack_PushR(calc_struct);
@@ -86,54 +102,87 @@ void processor(CalcStruct* calc_struct) { // each command has argument (it can b
     return;
 }
 
-int Stack_Calc (stack_struct* stack, int arif_operator) {
+// int Stack_Calc (stack_struct* stack, int arif_operator) {
 
-    int result = 0;
+//     int result = 0;
 
-    int operand_1 = 0;
-    int operand_2 = 0;
+//     int operand_1 = 0;
+//     int operand_2 = 0;
     
-    operand_1 = Stack_Pop(stack);
+//     operand_1 = Stack_Pop(stack);
 
-    if (arif_operator == CMD_ADD || 
-        arif_operator == CMD_SUB ||
-        arif_operator == CMD_MUL ||
-        arif_operator == CMD_DIV ) 
-    {
-        operand_2 = Stack_Pop(stack);  
-    }
+//     if (arif_operator == CMD_ADD || 
+//         arif_operator == CMD_SUB ||
+//         arif_operator == CMD_MUL ||
+//         arif_operator == CMD_DIV ) 
+//     {
+//         operand_2 = Stack_Pop(stack);  
+//     }
 
-    switch (arif_operator)
-    {
-    case CMD_ADD:
-        result = operand_2 + operand_1;
-        break;
+//     switch (arif_operator)
+//     {
+//     case CMD_ADD:
+//         result = operand_2 + operand_1;
+//         break;
     
-    case CMD_SUB:
-        result = operand_2 - operand_1;
-        break;
+//     case CMD_SUB:
+//         result = operand_2 - operand_1;
+//         break;
 
-    case CMD_MUL:
-        result = operand_2 * operand_1;
-        break;
+//     case CMD_MUL:
+//         result = operand_2 * operand_1;
+//         break;
 
-    case CMD_DIV:
-        result = (int) (operand_2 / operand_1);
-        break;
+//     case CMD_DIV:
+//         result = (int) (operand_2 / operand_1);
+//         break;
 
-    case CMD_SQRT:
-        result = sqrt( (double) operand_1);
-        break;
+//     case CMD_SQRT:
+//         result = sqrt( (double) operand_1);
+//         break;
 
-    default:
-        fprintf(stderr, "Stack_Calc: incorrect operator (%d)", arif_operator);
-        return UNKNOWN_COM;
-    }
+//     default:
+//         fprintf(stderr, "Stack_Calc: incorrect operator (%d)", arif_operator);
+//         return UNKNOWN_COM;
+//     }
 
-    Stack_Push(stack, result);
+//     Stack_Push(stack, result);
 
-    return CALC_SUCCESS;
+//     return CALC_SUCCESS;
+// }
+
+#define STACK_ARIFMETIC(operator, func_name)                                 \
+                                                                             \
+CalcErr_t Stack_Arif_##func_name (CalcStruct* calc_struct) {                 \
+    assert(calc_struct);                                                     \
+                                                                             \
+    int operand_1 = Stack_Pop( &(calc_struct -> calc_stack));                \
+    int operand_2 = Stack_Pop( &(calc_struct -> calc_stack));                \
+                                                                             \
+    int result = (int) (operand_2 operator operand_1);                       \
+                                                                             \
+    Stack_Push(&(calc_struct -> calc_stack), result);                        \
+                                                                             \
+    return CALC_SUCCESS;                                                     \
 }
+
+STACK_ARIFMETIC(+, Add)
+STACK_ARIFMETIC(-, Sub)
+STACK_ARIFMETIC(*, Mul)
+STACK_ARIFMETIC(/, Div)
+
+CalcErr_t Stack_Arif_Sqrt (CalcStruct* calc_struct) {                       
+    assert(calc_struct);                                                
+                                                                        
+    int operand = Stack_Pop( &(calc_struct -> calc_stack));                  
+                                                                        
+    int result = sqrt( (double) operand);              
+                                                                        
+    Stack_Push(&(calc_struct -> calc_stack), result);                   
+                                                                        
+    return CALC_SUCCESS;                                                
+}
+
 
 StackErr_t Stack_Push_Proc (CalcStruct* calc_struct) {
     assert(calc_struct);
@@ -152,7 +201,7 @@ StackErr_t Stack_Pop_Proc (CalcStruct* calc_struct) {
     return Stack_Pop(stack);
 }
 
-StackErr_t Stack_PushR (CalcStruct* calc_struct) {
+CalcErr_t Stack_PushR (CalcStruct* calc_struct) {
     assert(calc_struct);
     
     int register_num = calc_struct -> bite_code.buffer[calc_struct -> ind_counter + 1];
@@ -164,7 +213,7 @@ StackErr_t Stack_PushR (CalcStruct* calc_struct) {
     return Stack_Push(stack, value);
 }
 
-StackErr_t Stack_PopR (CalcStruct* calc_struct) {
+CalcErr_t Stack_PopR (CalcStruct* calc_struct) {
     assert(calc_struct);
 
     int register_num = calc_struct -> bite_code.buffer[calc_struct -> ind_counter + 1];
@@ -178,7 +227,7 @@ StackErr_t Stack_PopR (CalcStruct* calc_struct) {
     return SUCCESS;
 }
 
-StackErr_t Stack_In (CalcStruct* calc_struct) {
+CalcErr_t Stack_In (CalcStruct* calc_struct) {
     assert(calc_struct);
 
     printf("Enter value:\t");
@@ -198,7 +247,7 @@ StackErr_t Stack_In (CalcStruct* calc_struct) {
     return SUCCESS;
 }
 
-int Jump_to_JMP (CalcStruct* calc_struct) {
+CalcErr_t Jump_to_JMP (CalcStruct* calc_struct) {
     assert(calc_struct);
 
     int ind_to_jump = calc_struct -> bite_code.buffer[calc_struct -> ind_counter + 1];
@@ -210,7 +259,7 @@ int Jump_to_JMP (CalcStruct* calc_struct) {
 
 #define JUMP_IF(operator, func_name)                                                        \
                                                                                             \
-int Jump_##func_name (CalcStruct* calc_struct) {                                            \
+CalcErr_t Jump_##func_name (CalcStruct* calc_struct) {                                      \
     assert(calc_struct);                                                                    \
                                                                                             \
     int num1 = calc_struct -> calc_stack.data[calc_struct -> calc_stack.cur_position - 2];  \
