@@ -16,107 +16,71 @@
 
 void processor(CalcStruct* calc_struct) { // each command has argument (it can be fictive (POISON))
 
-    size_t bite_code_size =   calc_struct -> bite_code.size;
-    int*   bite_code_buf  =   calc_struct -> bite_code.buffer;
-    stack_struct*  stack  = &(calc_struct -> calc_stack);
-
-    size_t ind = 0;
-
-    while (ind < bite_code_size &&
-           bite_code_buf[ind] != CMD_HLT) 
+    while (calc_struct -> ind_counter < calc_struct -> bite_code.size &&
+           calc_struct -> bite_code.buffer[calc_struct -> ind_counter] != CMD_HLT) 
     {
-        int arif_operator = bite_code_buf[ind];
+        int arif_operator = calc_struct -> bite_code.buffer[calc_struct -> ind_counter];
         
         switch(arif_operator)
         {
             case CMD_PUSH:
-            {
-                stack_t push_arg = bite_code_buf[ind + 1];
-                Stack_Push(stack, push_arg);
+                Stack_Push_Proc(calc_struct);
                 break;
-            }
 
             case CMD_OUT: 
-                Stack_Pop(stack);
+                Stack_Pop_Proc(calc_struct);
                 break;
 
             case CMD_ADD: case CMD_SUB: case CMD_MUL: case CMD_DIV: case CMD_SQRT:
-                Stack_Calc(stack, arif_operator);
+                Stack_Calc(&(calc_struct -> calc_stack), arif_operator);
                 break;
 
             case CMD_PUSHR:
-            {
-                int register_num = bite_code_buf[ind + 1];
-                Stack_PushR(calc_struct, register_num);
+                Stack_PushR(calc_struct);
                 break;
-            }
 
             case CMD_POPR:
-            {
-                int register_num = bite_code_buf[ind + 1];
-                Stack_PopR(calc_struct, register_num);
+                Stack_PopR(calc_struct);
                 break;
-            }
 
             case CMD_IN:
                 Stack_In(calc_struct);
                 break;
 
             case CMD_JMP:
-            {
-                int cmd_num_to_return = bite_code_buf[ind + 1];
-                Jump_to_JMP(&ind, cmd_num_to_return);
+                Jump_to_JMP(calc_struct);
                 continue;
-            }
 
             case CMD_JB:
-            {
-                int cmd_num_to_return = bite_code_buf[ind + 1];
-                Jump_Below_JB(&ind, cmd_num_to_return, stack);
+                Jump_Below_JB(calc_struct);
                 continue;
-            }
 
             case CMD_JBE:
-            {    
-                int cmd_num_to_return = bite_code_buf[ind + 1];
-                Jump_Below_Equal_JBE(&ind, cmd_num_to_return, stack);
+                Jump_Below_Equal_JBE(calc_struct);
                 continue;
-            }
 
             case CMD_JA:
-            {
-                int cmd_num_to_return = bite_code_buf[ind + 1];
-                Jump_Above_JA(&ind, cmd_num_to_return, stack);
+                Jump_Above_JA(calc_struct);
                 continue;
-            }
 
             case CMD_JAE:
-            {
-                int cmd_num_to_return = bite_code_buf[ind + 1];
-                Jump_Above_Equal_JAE(&ind, cmd_num_to_return, stack);
+                Jump_Above_Equal_JAE(calc_struct);
                 continue;
-            }
 
             case CMD_JE:
-            {
-                int cmd_num_to_return = bite_code_buf[ind + 1];
-                Jump_Equal_JE(&ind, cmd_num_to_return, stack);
+                Jump_Equal_JE(calc_struct);
                 continue;
-            }
 
             case CMD_JNE:
-            {
-                int cmd_num_to_return = bite_code_buf[ind + 1];
-                Jump_Not_Equal_JNE(&ind, cmd_num_to_return, stack);
+                Jump_Not_Equal_JNE(calc_struct);
                 continue;
-            }
 
             default:
                 fprintf(stderr, "Processor: unknown arifmetic command");
                 break;
         }
 
-        ind += 2; // each command has argument (it can be fictive (POISON))
+        calc_struct -> ind_counter += 2; // each command has argument (it can be fictive (POISON))
     }
 
     return;
@@ -171,8 +135,27 @@ int Stack_Calc (stack_struct* stack, int arif_operator) {
     return CALC_SUCCESS;
 }
 
-StackErr_t Stack_PushR (CalcStruct* calc_struct, int register_num) {
+StackErr_t Stack_Push_Proc (CalcStruct* calc_struct) {
     assert(calc_struct);
+
+    stack_t push_arg    = calc_struct -> bite_code.buffer[calc_struct -> ind_counter + 1];
+    stack_struct* stack = &(calc_struct -> calc_stack);
+
+    return Stack_Push(stack, push_arg);
+}
+
+StackErr_t Stack_Pop_Proc (CalcStruct* calc_struct) {
+    assert(calc_struct);
+
+    stack_struct* stack = &(calc_struct -> calc_stack);
+
+    return Stack_Pop(stack);
+}
+
+StackErr_t Stack_PushR (CalcStruct* calc_struct) {
+    assert(calc_struct);
+    
+    int register_num = calc_struct -> bite_code.buffer[calc_struct -> ind_counter + 1];
     assert(register_num >= 0 && register_num <= COUNT_OF_REG);
 
     stack_t       value = calc_struct -> register_buf[register_num];
@@ -181,8 +164,10 @@ StackErr_t Stack_PushR (CalcStruct* calc_struct, int register_num) {
     return Stack_Push(stack, value);
 }
 
-StackErr_t Stack_PopR (CalcStruct* calc_struct, int register_num) {
+StackErr_t Stack_PopR (CalcStruct* calc_struct) {
     assert(calc_struct);
+
+    int register_num = calc_struct -> bite_code.buffer[calc_struct -> ind_counter + 1];
     assert(register_num >= 0 && register_num <= COUNT_OF_REG);
 
     stack_struct* stack = &(calc_struct -> calc_stack);
@@ -213,30 +198,31 @@ StackErr_t Stack_In (CalcStruct* calc_struct) {
     return SUCCESS;
 }
 
-int Jump_to_JMP (size_t* ind, int cmd_num) {
-    assert(ind);
+int Jump_to_JMP (CalcStruct* calc_struct) {
+    assert(calc_struct);
 
-    *ind = cmd_num;
+    int ind_to_jump = calc_struct -> bite_code.buffer[calc_struct -> ind_counter + 1];
+
+    calc_struct -> ind_counter = ind_to_jump;
 
     return SUCCESS;
 }
 
-#define JUMP_IF(operator, func_name)                                           \
-                                                                               \
-int Jump_##func_name (size_t* stack_ind, int cmd_num, stack_struct* stack) {   \
-    assert(stack_ind);                                                         \
-    assert(stack);                                                             \
-                                                                               \
-    int num1 = stack -> data[stack -> cur_position - 2];                       \
-    int num2 = stack -> data[stack -> cur_position - 1];                       \
-                                                                               \
-    if (num1 operator num2)                                                    \
-        Jump_to_JMP(stack_ind, cmd_num);                                       \
-                                                                               \
-    else                                                                       \
-        *stack_ind += 2;                                                       \
-                                                                               \
-    return SUCCESS;                                                            \
+#define JUMP_IF(operator, func_name)                                                        \
+                                                                                            \
+int Jump_##func_name (CalcStruct* calc_struct) {                                            \
+    assert(calc_struct);                                                                    \
+                                                                                            \
+    int num1 = calc_struct -> calc_stack.data[calc_struct -> calc_stack.cur_position - 2];  \
+    int num2 = calc_struct -> calc_stack.data[calc_struct -> calc_stack.cur_position - 1];  \
+                                                                                            \
+    if (num1 operator num2)                                                                 \
+        Jump_to_JMP(calc_struct);                                                           \
+                                                                                            \
+    else                                                                                    \
+        calc_struct -> ind_counter += 2;                                                    \
+                                                                                            \
+    return SUCCESS;                                                                         \
 }
 
 JUMP_IF(<, Below_JB)

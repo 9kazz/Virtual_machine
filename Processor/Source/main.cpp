@@ -25,17 +25,14 @@ int main() {
 
     CALC_CTOR(calc_struct)
 
-    // for (size_t i = 0; i < bite_code_size; i += 2)
-    //     printf("%d\t%d\n", bite_code_buf[i], bite_code_buf[i + 1]);
-
-    // INIT_STK(calc_stack);
-    // Stack_Ctor(&calc_stack, bite_code_size);
-
     processor(&calc_struct);
 
     for (size_t i = 0; i < calc_struct.calc_stack.cur_position; i++)
         printf("%d\n", calc_struct.calc_stack.data[i]);
-    // printf("\n%d", calc_struct.calc_stack.data[0]);
+    
+    // printf("\n");
+    // for (size_t i = 0; i < COUNT_OF_REG; i++)
+    //     printf("%d\n", calc_struct.register_buf[i]);
 
     Proc_Dtor(&calc_struct);
 

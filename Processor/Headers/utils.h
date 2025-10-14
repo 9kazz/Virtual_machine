@@ -46,7 +46,8 @@ struct  BiteCodeStruct {
 struct CalcStruct {
     BiteCodeStruct bite_code;
     stack_struct   calc_stack;
-    int*           register_buf;    
+    int*           register_buf;   
+    size_t         ind_counter;
 };
 
 
@@ -65,7 +66,8 @@ struct CalcStruct {
     CalcStruct name{};                                                                         \
         name.bite_code    = name##_bite_code_struct;                                           \
         name.calc_stack   = name##_stack;                                                      \
-        name.register_buf = name##_reg_arr;
+        name.register_buf = name##_reg_arr;                                                    \
+        name.ind_counter  = 0;
     
 
 int*   create_bite_code_buf (FILE* input_file, size_t* bite_code_size);
