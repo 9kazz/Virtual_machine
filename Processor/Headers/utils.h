@@ -8,6 +8,13 @@
 #include "stack_utils.h"
 #include "stack.h"
 
+
+                            /*CONSTANTS*/
+
+const int COUNT_OF_REG     = 8;
+const int MAX_COUNT_OF_CMD = 32;
+
+
 enum errors_and_success {
     UNKNOWN_COM = -100,
     INCOR_INPUT = -101, 
@@ -36,27 +43,38 @@ enum commands {
     CMD_JNE         = 70
 };
 
-const int COUNT_OF_REG = 8;
+
+                            /*STRUCTURES*/
+struct CalcStruct;
+struct CmdStruct;
+struct BiteCodeStruct;
 
 struct  BiteCodeStruct {
     int*   buffer;
     size_t size;
 };
 
+struct CmdStruct {
+    const char* name;
+    int         code;
+    int       (*cmd_func) (CalcStruct*);
+};
+
 struct CalcStruct {
+    CmdStruct*     cmd_info_arr;
     BiteCodeStruct bite_code;
     stack_struct   calc_stack;
     int*           register_buf;   
     size_t         ind_counter;
 };
 
-// struct CmdStruct {
-//     const char* name;
-//     int         code;
-//     int (*func) (CalcStruct*);
-// };
+
+                            /*DEFINES*/
 
 #define CALC_CTOR(name)                                                                        \
+                                                                                               \
+    CmdStruct* name##_cmd_info_arr = create_cmd_info_arr();                                    \
+                                                                                               \
     size_t name##_bite_code_size = 0;                                                          \
     int*   name##_bite_code_buf  = create_bite_code_buf(input_file, &name##_bite_code_size);   \
                                                                                                \
@@ -69,11 +87,25 @@ struct CalcStruct {
     int name##_reg_arr[8] = {0};                                                               \
                                                                                                \
     CalcStruct name{};                                                                         \
+        name.cmd_info_arr = name##_cmd_info_arr;                                               \
         name.bite_code    = name##_bite_code_struct;                                           \
         name.calc_stack   = name##_stack;                                                      \
         name.register_buf = name##_reg_arr;                                                    \
-        name.ind_counter  = 0;
+        name.ind_counter  = 0;  
     
+#define SAFE_CALLOC(name, size_of_buf, el_type)                                     \
+    el_type* temp_##name = (el_type*) calloc(size_of_buf, sizeof(el_type));         \
+                                                                                    \
+    if (temp_##name == NULL)                                                        \
+        fprintf(stderr, "Allocation error of" #name);                               \
+                                                                                    \
+    el_type* name = temp_##name;
+
+
+
+                            /*FUNCTIONS*/
+
+CmdStruct* create_cmd_info_arr(void);
 
 int*   create_bite_code_buf (FILE* input_file, size_t* bite_code_size);
 

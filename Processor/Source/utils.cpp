@@ -13,6 +13,40 @@
 #include "stack_utils.h"
 #include "stack.h"
 
+#define ONE_CMD_INFO(ind_in_arr, cmd_name, function)        \
+                                                            \
+CmdStruct cmd_##ind_in_arr {};                              \
+    cmd_##ind_in_arr.name     = #cmd_name;                  \
+    cmd_##ind_in_arr.code     = CMD_##cmd_name;             \
+    cmd_##ind_in_arr.cmd_func = &function;                  \
+                                                            \
+cmd_info_arr[ind_in_arr] = cmd_##ind_in_arr;
+
+CmdStruct* create_cmd_info_arr(void) {
+    
+    SAFE_CALLOC(cmd_info_arr, MAX_COUNT_OF_CMD, CmdStruct)
+
+    ONE_CMD_INFO(0, PUSH, Stack_Push_Proc)
+    ONE_CMD_INFO(1, OUT, Stack_Pop_Proc)
+    ONE_CMD_INFO(2, ADD, Stack_Arif_Add)
+    ONE_CMD_INFO(3, SUB, Stack_Arif_Sub)
+    ONE_CMD_INFO(4, MUL, Stack_Arif_Mul)
+    ONE_CMD_INFO(5, DIV, Stack_Arif_Div)
+    ONE_CMD_INFO(6, SQRT, Stack_Arif_Sqrt)
+    ONE_CMD_INFO(7, PUSHR, Stack_PushR)
+    ONE_CMD_INFO(8, POPR, Stack_PopR)
+    ONE_CMD_INFO(9, IN, Stack_In)
+    ONE_CMD_INFO(10, JMP, Jump_to_JMP)
+    ONE_CMD_INFO(11, JB, Jump_Below_JB)
+    ONE_CMD_INFO(12, JBE, Jump_Below_Equal_JBE)
+    ONE_CMD_INFO(13, JA, Jump_Above_JA)
+    ONE_CMD_INFO(14, JAE, Jump_Above_Equal_JAE)
+    ONE_CMD_INFO(15, JE, Jump_Equal_JE)
+    ONE_CMD_INFO(16, JNE, Jump_Not_Equal_JNE)
+
+    return cmd_info_arr;
+}
+
 int* create_bite_code_buf (FILE* input_file, size_t* bite_code_size) {
 
     *bite_code_size = size_of_file(input_file);

@@ -25,6 +25,9 @@ int main() {
 
     CALC_CTOR(calc_struct)
 
+    // for (size_t i = 0; i < MAX_COUNT_OF_CMD; i++)
+    //     printf("%s \t %d \n", calc_struct.cmd_info_arr[i].name, calc_struct.cmd_info_arr[i].code);
+
     processor(&calc_struct);
 
     for (size_t i = 0; i < calc_struct.calc_stack.cur_position; i++)

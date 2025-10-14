@@ -102,55 +102,6 @@ void processor(CalcStruct* calc_struct) { // each command has argument (it can b
     return;
 }
 
-// int Stack_Calc (stack_struct* stack, int arif_operator) {
-
-//     int result = 0;
-
-//     int operand_1 = 0;
-//     int operand_2 = 0;
-    
-//     operand_1 = Stack_Pop(stack);
-
-//     if (arif_operator == CMD_ADD || 
-//         arif_operator == CMD_SUB ||
-//         arif_operator == CMD_MUL ||
-//         arif_operator == CMD_DIV ) 
-//     {
-//         operand_2 = Stack_Pop(stack);  
-//     }
-
-//     switch (arif_operator)
-//     {
-//     case CMD_ADD:
-//         result = operand_2 + operand_1;
-//         break;
-    
-//     case CMD_SUB:
-//         result = operand_2 - operand_1;
-//         break;
-
-//     case CMD_MUL:
-//         result = operand_2 * operand_1;
-//         break;
-
-//     case CMD_DIV:
-//         result = (int) (operand_2 / operand_1);
-//         break;
-
-//     case CMD_SQRT:
-//         result = sqrt( (double) operand_1);
-//         break;
-
-//     default:
-//         fprintf(stderr, "Stack_Calc: incorrect operator (%d)", arif_operator);
-//         return UNKNOWN_COM;
-//     }
-
-//     Stack_Push(stack, result);
-
-//     return CALC_SUCCESS;
-// }
-
 #define STACK_ARIFMETIC(operator, func_name)                                 \
                                                                              \
 CalcErr_t Stack_Arif_##func_name (CalcStruct* calc_struct) {                 \
