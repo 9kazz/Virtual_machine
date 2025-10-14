@@ -47,16 +47,16 @@ CmdStruct* create_cmd_info_arr(void) {
     return cmd_info_arr;
 }
 
-CmdStruct* find_cmd_in_arr(CalcStruct* calc_struct, int code_of_cmd) {
-    assert(calc_struct);
+CmdStruct* find_cmd_in_arr(ProcStruct* Proc_struct, int code_of_cmd) {
+    assert(Proc_struct);
 
     int el_num = 0;
 
     while (el_num < MAX_COUNT_OF_CMD &&
-           calc_struct -> cmd_info_arr[el_num].code != 0)
+           Proc_struct -> cmd_info_arr[el_num].code != 0)
     {
-        if (calc_struct -> cmd_info_arr[el_num].code == code_of_cmd)
-            return &(calc_struct -> cmd_info_arr[el_num]);
+        if (Proc_struct -> cmd_info_arr[el_num].code == code_of_cmd)
+            return &(Proc_struct -> cmd_info_arr[el_num]);
 
         ++el_num;
     }

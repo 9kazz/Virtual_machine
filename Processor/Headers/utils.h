@@ -45,7 +45,7 @@ enum commands {
 
 
                             /*STRUCTURES*/
-struct CalcStruct;
+struct ProcStruct;
 struct CmdStruct;
 struct BiteCodeStruct;
 
@@ -57,10 +57,10 @@ struct  BiteCodeStruct {
 struct CmdStruct {
     const char* name;
     int         code;
-    int       (*cmd_func) (CalcStruct*);
+    int       (*cmd_func) (ProcStruct*);
 };
 
-struct CalcStruct {
+struct ProcStruct {
     CmdStruct*     cmd_info_arr;
     BiteCodeStruct bite_code;
     stack_struct   calc_stack;
@@ -86,7 +86,7 @@ struct CalcStruct {
                                                                                                \
     int name##_reg_arr[8] = {0};                                                               \
                                                                                                \
-    CalcStruct name{};                                                                         \
+    ProcStruct name{};                                                                         \
         name.cmd_info_arr = name##_cmd_info_arr;                                               \
         name.bite_code    = name##_bite_code_struct;                                           \
         name.calc_stack   = name##_stack;                                                      \
@@ -106,7 +106,7 @@ struct CalcStruct {
                             /*FUNCTIONS*/
 
 CmdStruct* create_cmd_info_arr (void);
-CmdStruct* find_cmd_in_arr     (CalcStruct* calc_struct, int code_of_cmd);
+CmdStruct* find_cmd_in_arr     (ProcStruct* Proc_struct, int code_of_cmd);
 
 int*   create_bite_code_buf (FILE* input_file, size_t* bite_code_size);
 
