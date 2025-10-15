@@ -16,9 +16,11 @@
 
 void processor(ProcStruct* Proc_struct) { // each command has argument (it can be fictive (POISON))
 
+    
     while (Proc_struct -> ind_counter  <  Proc_struct -> bite_code.size &&
-           Proc_struct -> bite_code.buffer[Proc_struct -> ind_counter]  !=  CMD_HLT) 
-    {
+        Proc_struct -> bite_code.buffer[Proc_struct -> ind_counter]  !=  CMD_HLT) 
+        {
+            
         int code_of_cmd = Proc_struct -> bite_code.buffer[Proc_struct -> ind_counter];
         
         CmdStruct* info_of_cmd = find_cmd_in_arr(Proc_struct, code_of_cmd);
@@ -134,6 +136,8 @@ CalcErr_t Jump_to_JMP (ProcStruct* Proc_struct) {
 
     Proc_struct -> ind_counter = ind_to_jump;
 
+    Proc_struct -> ind_counter -= 2;
+
     return SUCCESS;
 }
 
@@ -145,10 +149,8 @@ CalcErr_t Jump_##func_name (ProcStruct* Proc_struct) {                          
     int num1 = Proc_struct -> calc_stack.data[Proc_struct -> calc_stack.cur_position - 2];  \
     int num2 = Proc_struct -> calc_stack.data[Proc_struct -> calc_stack.cur_position - 1];  \
                                                                                             \
-    if (num1 operator num2) {                                                               \
+    if (num1 operator num2)                                                                 \
         Jump_to_JMP(Proc_struct);                                                           \
-        Proc_struct -> ind_counter -= 2;                                                    \
-    }                                                                                       \
                                                                                             \
     return SUCCESS;                                                                         \
 }
@@ -159,6 +161,30 @@ JUMP_IF(>, Above_JA)
 JUMP_IF(>=, Above_Equal_JAE)
 JUMP_IF(==, Equal_JE)
 JUMP_IF(!=, Not_Equal_JNE)
+
+CalcErr_t Call_command (ProcStruct* Proc_struct) {
+    assert(Proc_struct);
+
+    int remember_ind = Proc_struct -> ind_counter + 2;
+    
+    Stack_Push( &(Proc_struct -> return_stack), remember_ind);
+
+    Jump_to_JMP(Proc_struct);
+
+    return SUCCESS;
+}
+
+CalcErr_t Return_to_call_RET (ProcStruct* Proc_struct) {
+    assert(Proc_struct);
+
+    int ind_to_return = Stack_Pop( &(Proc_struct -> return_stack) );
+    
+    Proc_struct -> ind_counter = ind_to_return;
+
+    Proc_struct -> ind_counter -= 2;    
+
+    return SUCCESS;
+}
 
 
 CalcErr_t Proc_Dtor (ProcStruct* Proc_struct) {

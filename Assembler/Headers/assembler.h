@@ -29,7 +29,9 @@ enum commands {
     CMD_JA          = 67,
     CMD_JAE         = 68,
     CMD_JE          = 69,
-    CMD_JNE         = 70
+    CMD_JNE         = 70,
+    CMD_CALL        = 71,
+    CMD_RET         = 72
 };
 
 const int POISON           = 0xDEADFACE;

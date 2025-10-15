@@ -54,7 +54,7 @@ size_t fill_byte_code_buf (char** pointers_array, asm_struct* Assembler, int* by
     {
         count_of_arg = sscanf( (const char*) pointers_array[cmd_num], "%32s %32s", command_str, argument_str); // COMMAND_MAX_LEN = 32
 
-        if (count_of_arg == 0) {
+        if (count_of_arg == 0) {                            // TODO: new func
             fprintf(stderr, "Incorrect ASM-code");
             return 0;
 
@@ -141,6 +141,12 @@ int command_identify (const char* command_str) {
     } else if (strcmp(command_str, "JNE") == 0) {
         return CMD_JNE;
 
+    } else if (strcmp(command_str, "CALL") == 0) {
+        return CMD_CALL;
+
+    } else if (strcmp(command_str, "RET") == 0) {
+        return CMD_RET;
+
     } else 
         return UNKNOWN_COM;
 }
@@ -156,12 +162,12 @@ int argument_identify (int count_of_arg, int command_int, const char* argument_s
 
         case 2: // two arguments
 
-            if (command_int >= 33 &&                                  // CMD_PUSHR = 33, CMD_POPR = 34, CMD_IN = 35
-                command_int <= 35)
+            if (command_int >= CMD_PUSHR &&                                  // CMD_PUSHR = 33, CMD_POPR = 34, CMD_IN = 35
+                command_int <= CMD_IN)
                 return register_num(argument_str);
 
-            if (command_int >= 64 &&                                  // CMD_JMP = 64, CMD_JB  = 65, CMD_JBE = 66 
-                command_int <= 70)  {                                 // CMD_JA  = 67, CMD_JAE = 68, CMD_JE  = 69, CMD_JNE = 70
+            if (command_int >= CMD_JMP &&                                  // CMD_JMP = 64, CMD_JB  = 65, CMD_JBE = 66, CMD_JA    = 67
+                command_int <= CMD_CALL)  {                                 // CMD_JAE = 68, CMD_JE  = 69, CMD_JNE = 70, CMD_CALL = 71
                 return identify_label(argument_str, label_array);
             }
 

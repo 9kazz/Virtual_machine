@@ -26,6 +26,9 @@ CalcErr_t Stack_PushR   (ProcStruct* Proc_struct);
 CalcErr_t Stack_PopR    (ProcStruct* Proc_struct);
 CalcErr_t Stack_In      (ProcStruct* Proc_struct);
 
+CalcErr_t Call_command       (ProcStruct* Proc_struct);
+CalcErr_t Return_to_call_RET (ProcStruct* Proc_struct);
+
 CalcErr_t Jump_to_JMP          (ProcStruct* Proc_struct);
 CalcErr_t Jump_Below_JB        (ProcStruct* Proc_struct);
 CalcErr_t Jump_Below_Equal_JBE (ProcStruct* Proc_struct);

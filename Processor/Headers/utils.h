@@ -11,8 +11,9 @@
 
                             /*CONSTANTS*/
 
-const int COUNT_OF_REG     = 8;
-const int MAX_COUNT_OF_CMD = 32;
+const int COUNT_OF_REG          = 8;
+const int MAX_COUNT_OF_CMD      = 32;
+const int RETURN_STACK_CAPACITY = 32;
 
 
 enum errors_and_success {
@@ -40,7 +41,9 @@ enum commands {
     CMD_JA          = 67,
     CMD_JAE         = 68,
     CMD_JE          = 69,
-    CMD_JNE         = 70
+    CMD_JNE         = 70,
+    CMD_CALL        = 71,
+    CMD_RET         = 72
 };
 
 
@@ -63,9 +66,10 @@ struct CmdStruct {
 struct ProcStruct {
     CmdStruct*     cmd_info_arr;
     BiteCodeStruct bite_code;
-    stack_struct   calc_stack;
-    int*           register_buf;   
     size_t         ind_counter;
+    stack_struct   calc_stack;
+    stack_struct   return_stack;
+    int*           register_buf;   
 };
 
 
@@ -84,14 +88,17 @@ struct ProcStruct {
                                                                                                \
     STK_CTOR(name##_stack, name##_bite_code_size)                                              \
                                                                                                \
+    STK_CTOR(name##_return_stack, RETURN_STACK_CAPACITY)                                       \
+                                                                                               \
     int name##_reg_arr[8] = {0};                                                               \
                                                                                                \
     ProcStruct name{};                                                                         \
         name.cmd_info_arr = name##_cmd_info_arr;                                               \
         name.bite_code    = name##_bite_code_struct;                                           \
+        name.ind_counter  = 0;                                                                 \
         name.calc_stack   = name##_stack;                                                      \
-        name.register_buf = name##_reg_arr;                                                    \
-        name.ind_counter  = 0;  
+        name.return_stack = name##_return_stack;                                               \
+        name.register_buf = name##_reg_arr;                                                    
     
 #define SAFE_CALLOC(name, size_of_buf, el_type)                                     \
     el_type* temp_##name = (el_type*) calloc(size_of_buf, sizeof(el_type));         \

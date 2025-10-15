@@ -43,6 +43,8 @@ CmdStruct* create_cmd_info_arr(void) {
     ONE_CMD_INFO(14, JAE,   Jump_Above_Equal_JAE)
     ONE_CMD_INFO(15, JE,    Jump_Equal_JE)
     ONE_CMD_INFO(16, JNE,   Jump_Not_Equal_JNE)
+    ONE_CMD_INFO(17, CALL,  Call_command)
+    ONE_CMD_INFO(18, RET,   Return_to_call_RET)
 
     return cmd_info_arr;
 }
@@ -61,7 +63,7 @@ CmdStruct* find_cmd_in_arr(ProcStruct* Proc_struct, int code_of_cmd) {
         ++el_num;
     }
 
-    fprintf(stderr, "find_cmd_in_arr: can`t find this command in cmd_info_array\n");
+    fprintf(stderr, "find_cmd_in_arr: can`t find this command (%d) in cmd_info_array\n", code_of_cmd);
     return NULL;
 }
 
