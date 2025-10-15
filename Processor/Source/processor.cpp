@@ -17,17 +17,17 @@
 void processor(ProcStruct* Proc_struct) { // each command has argument (it can be fictive (POISON))
 
     
-    while (Proc_struct -> ind_counter  <  Proc_struct -> bite_code.size &&
-        Proc_struct -> bite_code.buffer[Proc_struct -> ind_counter]  !=  CMD_HLT) 
+    while (Proc_struct -> bite_code.ind_counter  <  Proc_struct -> bite_code.size &&
+        Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter]  !=  CMD_HLT) 
         {
             
-        int code_of_cmd = Proc_struct -> bite_code.buffer[Proc_struct -> ind_counter];
+        int code_of_cmd = Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter];
         
         CmdStruct* info_of_cmd = find_cmd_in_arr(Proc_struct, code_of_cmd);
 
         info_of_cmd -> cmd_func(Proc_struct);
 
-        Proc_struct -> ind_counter += 2; // each command has argument (it can be fictive (POISON))
+        Proc_struct -> bite_code.ind_counter += 2; // each command has argument (it can be fictive (POISON))
     }
 
     return;
@@ -69,7 +69,7 @@ CalcErr_t Stack_Arif_Sqrt (ProcStruct* Proc_struct) {
 StackErr_t Stack_Push_Proc (ProcStruct* Proc_struct) {
     assert(Proc_struct);
 
-    stack_t push_arg    = Proc_struct -> bite_code.buffer[Proc_struct -> ind_counter + 1];
+    stack_t push_arg    = Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter + 1];
     stack_struct* stack = &(Proc_struct -> calc_stack);
 
     return Stack_Push(stack, push_arg);
@@ -86,7 +86,7 @@ StackErr_t Stack_Pop_Proc (ProcStruct* Proc_struct) {
 CalcErr_t Stack_PushR (ProcStruct* Proc_struct) {
     assert(Proc_struct);
     
-    int register_num = Proc_struct -> bite_code.buffer[Proc_struct -> ind_counter + 1];
+    int register_num = Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter + 1];
     assert(register_num >= 0 && register_num <= COUNT_OF_REG);
 
     stack_t       value = Proc_struct -> register_buf[register_num];
@@ -98,7 +98,7 @@ CalcErr_t Stack_PushR (ProcStruct* Proc_struct) {
 CalcErr_t Stack_PopR (ProcStruct* Proc_struct) {
     assert(Proc_struct);
 
-    int register_num = Proc_struct -> bite_code.buffer[Proc_struct -> ind_counter + 1];
+    int register_num = Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter + 1];
     assert(register_num >= 0 && register_num <= COUNT_OF_REG);
 
     stack_struct* stack = &(Proc_struct -> calc_stack);
@@ -132,11 +132,11 @@ CalcErr_t Stack_In (ProcStruct* Proc_struct) {
 CalcErr_t Jump_to_JMP (ProcStruct* Proc_struct) {
     assert(Proc_struct);
 
-    int ind_to_jump = Proc_struct -> bite_code.buffer[Proc_struct -> ind_counter + 1];
+    int ind_to_jump = Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter + 1];
 
-    Proc_struct -> ind_counter = ind_to_jump;
+    Proc_struct -> bite_code.ind_counter = ind_to_jump;
 
-    Proc_struct -> ind_counter -= 2;
+    Proc_struct -> bite_code.ind_counter -= 2;
 
     return SUCCESS;
 }
@@ -165,7 +165,7 @@ JUMP_IF(!=, Not_Equal_JNE)
 CalcErr_t Call_command (ProcStruct* Proc_struct) {
     assert(Proc_struct);
 
-    int remember_ind = Proc_struct -> ind_counter + 2;
+    int remember_ind = Proc_struct -> bite_code.ind_counter + 2;
     
     Stack_Push( &(Proc_struct -> return_stack), remember_ind);
 
@@ -179,9 +179,9 @@ CalcErr_t Return_to_call_RET (ProcStruct* Proc_struct) {
 
     int ind_to_return = Stack_Pop( &(Proc_struct -> return_stack) );
     
-    Proc_struct -> ind_counter = ind_to_return;
+    Proc_struct -> bite_code.ind_counter = ind_to_return;
 
-    Proc_struct -> ind_counter -= 2;    
+    Proc_struct -> bite_code.ind_counter -= 2;    
 
     return SUCCESS;
 }

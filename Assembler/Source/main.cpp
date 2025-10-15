@@ -11,7 +11,7 @@
 
 int main() {
     FILE* input_file  = fopen("input_file.txt",  "r");
-    FILE* output_file = fopen("output_file.txt", "w");
+    FILE* output_file = fopen("../byte_code.txt", "w");
     assert(input_file);
     assert(output_file);
 

@@ -55,6 +55,7 @@ struct BiteCodeStruct;
 struct  BiteCodeStruct {
     int*   buffer;
     size_t size;
+    size_t ind_counter;
 };
 
 struct CmdStruct {
@@ -66,7 +67,6 @@ struct CmdStruct {
 struct ProcStruct {
     CmdStruct*     cmd_info_arr;
     BiteCodeStruct bite_code;
-    size_t         ind_counter;
     stack_struct   calc_stack;
     stack_struct   return_stack;
     int*           register_buf;   
@@ -83,8 +83,9 @@ struct ProcStruct {
     int*   name##_bite_code_buf  = create_bite_code_buf(input_file, &name##_bite_code_size);   \
                                                                                                \
     BiteCodeStruct name##_bite_code_struct {};                                                 \
-        name##_bite_code_struct.buffer = name##_bite_code_buf;                                 \
-        name##_bite_code_struct.size   = name##_bite_code_size;                                \
+        name##_bite_code_struct.buffer      = name##_bite_code_buf;                            \
+        name##_bite_code_struct.size        = name##_bite_code_size;                           \
+        name##_bite_code_struct.ind_counter = 0;                                               \
                                                                                                \
     STK_CTOR(name##_stack, name##_bite_code_size)                                              \
                                                                                                \
@@ -95,7 +96,6 @@ struct ProcStruct {
     ProcStruct name{};                                                                         \
         name.cmd_info_arr = name##_cmd_info_arr;                                               \
         name.bite_code    = name##_bite_code_struct;                                           \
-        name.ind_counter  = 0;                                                                 \
         name.calc_stack   = name##_stack;                                                      \
         name.return_stack = name##_return_stack;                                               \
         name.register_buf = name##_reg_arr;                                                    

@@ -17,11 +17,10 @@
 FILE* LogFile = fopen("errors.log", "w");
 
 int main() {
-    FILE* input_file  = fopen("input_file.txt",  "r");
-    FILE* output_file = fopen("output_file.txt", "w");
+    FILE* input_file = fopen("../byte_code.txt",  "r");
+
     assert(LogFile);
     assert(input_file);
-    assert(output_file);
 
     CALC_CTOR(Proc_struct)
 
@@ -42,7 +41,6 @@ int main() {
     Proc_Dtor(&Proc_struct);
 
     fclose(input_file);
-    fclose(output_file);
     fclose(LogFile);
 
     fprintf(stdout, "END WITH SUCCESS");
