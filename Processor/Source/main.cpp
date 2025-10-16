@@ -22,7 +22,9 @@ int main() {
     assert(LogFile);
     assert(input_file);
 
-    CALC_CTOR(Proc_struct)
+    int RAM[CAPASITY_OF_RAM] = {0};
+
+    CALC_CTOR(Proc_struct, RAM)
 
     // printf("cmd_info_arr:\n");
     // for (size_t i = 0; i < MAX_COUNT_OF_CMD; i++)

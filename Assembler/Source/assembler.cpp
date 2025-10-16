@@ -84,70 +84,44 @@ size_t fill_byte_code_buf (char** pointers_array, asm_struct* Assembler, int* by
     return count_of_commands_without_labeles;
 }
 
+#define ELSE_IF_CMD(cmd_name)                              \
+    else if (strcmp(command_str, #cmd_name) == 0)          \
+        return CMD_##cmd_name; 
+
 int command_identify (const char* command_str) {
     assert(command_str);
     
-    if (strcmp(command_str, "PUSH") == 0) {
+    if (strcmp(command_str, "PUSH") == 0)
         return CMD_PUSH;
 
-    } else if (strcmp(command_str, "ADD") == 0) {
-        return CMD_ADD;
+    ELSE_IF_CMD(OUT)
+    ELSE_IF_CMD(HLT)
 
-    } else if (strcmp(command_str, "SUB") == 0) {
-        return CMD_SUB;
+    ELSE_IF_CMD(ADD)
+    ELSE_IF_CMD(SUB)
+    ELSE_IF_CMD(MUL)
+    ELSE_IF_CMD(DIV)
+    ELSE_IF_CMD(SQRT)
 
-    } else if (strcmp(command_str, "MUL") == 0) {
-        return CMD_MUL;
+    ELSE_IF_CMD(PUSHR)
+    ELSE_IF_CMD(POPR)
+    ELSE_IF_CMD(IN)
 
-    } else if (strcmp(command_str, "DIV") == 0) {
-        return CMD_DIV;
-    
-    } else if (strcmp(command_str, "OUT") == 0) {
-        return CMD_OUT;
-    
-    } else if (strcmp(command_str, "HLT") == 0) {
-        return CMD_HLT;
-    
-    } else if (strcmp(command_str, "SQRT") == 0) {
-        return CMD_SQRT;
+    ELSE_IF_CMD(JMP)
+    ELSE_IF_CMD(JB)
+    ELSE_IF_CMD(JBE)
+    ELSE_IF_CMD(JA)
+    ELSE_IF_CMD(JAE)
+    ELSE_IF_CMD(JE)
+    ELSE_IF_CMD(JNE)
 
-    } else if (strcmp(command_str, "PUSHR") == 0) {
-        return CMD_PUSHR;
+    ELSE_IF_CMD(CALL)
+    ELSE_IF_CMD(RET)
 
-    } else if (strcmp(command_str, "POPR") == 0) {
-        return CMD_POPR;
+    ELSE_IF_CMD(PUSHM)
+    ELSE_IF_CMD(POPM)
 
-    } else if (strcmp(command_str, "IN") == 0) {
-        return CMD_IN;
-
-    } else if (strcmp(command_str, "JMP") == 0) {
-        return CMD_JMP;
-
-    } else if (strcmp(command_str, "JB") == 0) {
-        return CMD_JB;
-        
-    } else if (strcmp(command_str, "JBE") == 0) {
-        return CMD_JBE;
-        
-    } else if (strcmp(command_str, "JA") == 0) {
-        return CMD_JA;
-        
-    } else if (strcmp(command_str, "JAE") == 0) {
-        return CMD_JAE;
-        
-    } else if (strcmp(command_str, "JE") == 0) {
-        return CMD_JE;
-        
-    } else if (strcmp(command_str, "JNE") == 0) {
-        return CMD_JNE;
-
-    } else if (strcmp(command_str, "CALL") == 0) {
-        return CMD_CALL;
-
-    } else if (strcmp(command_str, "RET") == 0) {
-        return CMD_RET;
-
-    } else 
+    else 
         return UNKNOWN_COM;
 }
 
@@ -162,16 +136,20 @@ int argument_identify (int count_of_arg, int command_int, const char* argument_s
 
         case 2: // two arguments
 
-            if (command_int >= CMD_PUSHR &&                                  // CMD_PUSHR = 33, CMD_POPR = 34, CMD_IN = 35
+            if  (command_int >= CMD_PUSHR &&                                // CMD_PUSHR = 33, CMD_POPR = 34, CMD_IN = 35
                 command_int <= CMD_IN)
                 return register_num(argument_str);
 
-            if (command_int >= CMD_JMP &&                                  // CMD_JMP = 64, CMD_JB  = 65, CMD_JBE = 66, CMD_JA    = 67
-                command_int <= CMD_CALL)  {                                 // CMD_JAE = 68, CMD_JE  = 69, CMD_JNE = 70, CMD_CALL = 71
+            else if (command_int >= CMD_JMP &&                              // CMD_JMP = 64, CMD_JB  = 65, CMD_JBE = 66, CMD_JA    = 67
+                    command_int <= CMD_CALL)                                // CMD_JAE = 68, CMD_JE  = 69, CMD_JNE = 70, CMD_CALL = 71
                 return identify_label(argument_str, label_array);
-            }
 
-            return atoi(argument_str);
+            else if (command_int >= CMD_PUSHM &&                            // CMD_PUSHM = 73, CMD_POPM = 74
+                    command_int <= CMD_POPM)
+                return indentify_register_RAM( (char*) argument_str);
+
+            else
+                return atoi(argument_str);
 
         default:
             break;
@@ -192,7 +170,7 @@ int register_num (const char* argument_str) {
         offset_from_first_reg > COUNT_OF_REG) 
     {
         fprintf(stderr, "Register_num: incorrect register");
-        return 0;
+        return -1;
     }
 
     return offset_from_first_reg;
@@ -249,4 +227,23 @@ int is_label(char* string) {
         return 1;
 
     return 0;
+}
+
+int indentify_register_RAM(char* argument_str) {
+    assert(argument_str);
+
+    int Register = -1;
+
+    if (argument_str[0] == '[' &&
+        argument_str[4] == ']') 
+    {
+        argument_str[4] = '\0';
+        Register = register_num(argument_str + 1);
+        argument_str[4] = ']';
+    }
+
+    else 
+        fprintf(stderr, "Incorrect syntacsis of RAM commans");
+
+    return Register;
 }

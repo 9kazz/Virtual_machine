@@ -31,7 +31,9 @@ enum commands {
     CMD_JE          = 69,
     CMD_JNE         = 70,
     CMD_CALL        = 71,
-    CMD_RET         = 72
+    CMD_RET         = 72,
+    CMD_PUSHM       = 73,
+    CMD_POPM        = 74
 };
 
 const int POISON           = 0xDEADFACE;
@@ -50,5 +52,6 @@ int    fill_label_array   (char*       command_str,  size_t* count_of_commands_w
 int    identify_label     (const char* argument_str, int*    label_array);
 int    is_label           (char*       string);
 
+int    indentify_register_RAM (char* argument_str);
 
 #endif

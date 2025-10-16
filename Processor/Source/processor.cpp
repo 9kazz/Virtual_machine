@@ -89,7 +89,7 @@ CalcErr_t Stack_PushR (ProcStruct* Proc_struct) {
     int register_num = Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter + 1];
     assert(register_num >= 0 && register_num <= COUNT_OF_REG);
 
-    stack_t       value = Proc_struct -> register_buf[register_num];
+    stack_t       value =   Proc_struct -> register_buf[register_num];
     stack_struct* stack = &(Proc_struct -> calc_stack);
 
     return Stack_Push(stack, value);
@@ -167,7 +167,9 @@ CalcErr_t Call_command (ProcStruct* Proc_struct) {
 
     int remember_ind = Proc_struct -> bite_code.ind_counter + 2;
     
-    Stack_Push( &(Proc_struct -> return_stack), remember_ind);
+    stack_struct* stack = &(Proc_struct -> calc_stack);
+    
+    Stack_Push(stack, remember_ind);
 
     Jump_to_JMP(Proc_struct);
 
@@ -177,7 +179,9 @@ CalcErr_t Call_command (ProcStruct* Proc_struct) {
 CalcErr_t Return_to_call_RET (ProcStruct* Proc_struct) {
     assert(Proc_struct);
 
-    int ind_to_return = Stack_Pop( &(Proc_struct -> return_stack) );
+    stack_struct* stack = &(Proc_struct -> calc_stack);
+
+    int ind_to_return = Stack_Pop(stack);
     
     Proc_struct -> bite_code.ind_counter = ind_to_return;
 
@@ -186,6 +190,36 @@ CalcErr_t Return_to_call_RET (ProcStruct* Proc_struct) {
     return SUCCESS;
 }
 
+CalcErr_t Push_from_RAM_PUSHM(ProcStruct* Proc_struct) {
+    assert(Proc_struct);
+
+    int register_num = Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter + 1];
+    
+    size_t RAM_ind   = Proc_struct -> register_buf[register_num];
+
+    stack_struct* stack = &(Proc_struct -> calc_stack);
+    int pushing_value   =   Proc_struct -> RAM_buf[RAM_ind];
+
+    Stack_Push(stack, pushing_value);
+
+    return SUCCESS;
+}
+
+CalcErr_t Pop_to_RAM_POPM(ProcStruct* Proc_struct) {
+    assert(Proc_struct);
+
+    int register_num = Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter + 1];
+    
+    size_t RAM_ind   = Proc_struct -> register_buf[register_num];
+
+    stack_struct* stack = &(Proc_struct -> calc_stack);
+
+    int popping_value = Stack_Pop(stack);
+
+    Proc_struct -> RAM_buf[RAM_ind] = popping_value;
+
+    return SUCCESS;
+}
 
 CalcErr_t Proc_Dtor (ProcStruct* Proc_struct) {
     assert(Proc_struct);

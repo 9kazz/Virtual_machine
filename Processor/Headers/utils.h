@@ -11,9 +11,10 @@
 
                             /*CONSTANTS*/
 
-const int COUNT_OF_REG          = 8;
-const int MAX_COUNT_OF_CMD      = 32;
-const int RETURN_STACK_CAPACITY = 32;
+const int COUNT_OF_REG          =  8;
+const int MAX_COUNT_OF_CMD      =  32;
+const int RETURN_STACK_CAPACITY =  32;
+const int CAPASITY_OF_RAM       = 100;
 
 
 enum errors_and_success {
@@ -43,7 +44,9 @@ enum commands {
     CMD_JE          = 69,
     CMD_JNE         = 70,
     CMD_CALL        = 71,
-    CMD_RET         = 72
+    CMD_RET         = 72,
+    CMD_PUSHM       = 73,
+    CMD_POPM        = 74
 };
 
 
@@ -70,12 +73,13 @@ struct ProcStruct {
     stack_struct   calc_stack;
     stack_struct   return_stack;
     int*           register_buf;   
+    int*           RAM_buf;
 };
 
 
                             /*DEFINES*/
 
-#define CALC_CTOR(name)                                                                        \
+#define CALC_CTOR(name, RAM)                                                                   \
                                                                                                \
     CmdStruct* name##_cmd_info_arr = create_cmd_info_arr();                                    \
                                                                                                \
@@ -91,14 +95,15 @@ struct ProcStruct {
                                                                                                \
     STK_CTOR(name##_return_stack, RETURN_STACK_CAPACITY)                                       \
                                                                                                \
-    int name##_reg_arr[8] = {0};                                                               \
+    int name##_reg_arr[COUNT_OF_REG] = {0};                                                    \
                                                                                                \
     ProcStruct name{};                                                                         \
         name.cmd_info_arr = name##_cmd_info_arr;                                               \
         name.bite_code    = name##_bite_code_struct;                                           \
         name.calc_stack   = name##_stack;                                                      \
         name.return_stack = name##_return_stack;                                               \
-        name.register_buf = name##_reg_arr;                                                    
+        name.register_buf = name##_reg_arr;                                                    \
+        name.RAM_buf      = RAM;
     
 #define SAFE_CALLOC(name, size_of_buf, el_type)                                     \
     el_type* temp_##name = (el_type*) calloc(size_of_buf, sizeof(el_type));         \

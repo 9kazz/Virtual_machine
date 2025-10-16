@@ -45,6 +45,8 @@ CmdStruct* create_cmd_info_arr(void) {
     ONE_CMD_INFO(16, JNE,   Jump_Not_Equal_JNE)
     ONE_CMD_INFO(17, CALL,  Call_command)
     ONE_CMD_INFO(18, RET,   Return_to_call_RET)
+    ONE_CMD_INFO(19, PUSHM, Push_from_RAM_PUSHM)
+    ONE_CMD_INFO(20, POPM, Pop_to_RAM_POPM)
 
     return cmd_info_arr;
 }
