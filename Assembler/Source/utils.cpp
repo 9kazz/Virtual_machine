@@ -99,6 +99,8 @@ void fprint_byte_code (FILE* output_file, asm_struct Assembler) {
 
     size_t el_num = 0;
 
+    fprintf(output_file, "%d 2 110407 \n", Assembler.count_of_commands);
+
     while (el_num < byte_code_size) 
     {
         fprintf(output_file, "%d\t", Assembler.byte_code_buf[ el_num++ ]);

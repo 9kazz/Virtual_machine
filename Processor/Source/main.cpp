@@ -18,9 +18,11 @@ FILE* LogFile = fopen("errors.log", "w");
 
 int main() {
     FILE* input_file = fopen("../byte_code.txt",  "r");
+    FILE* draw_file  = fopen("../draw.txt", "w");
 
     assert(LogFile);
     assert(input_file);
+    assert(draw_file);
 
     int RAM[CAPASITY_OF_RAM] = {0};
 
@@ -36,6 +38,9 @@ int main() {
     for (size_t i = 0; i < Proc_struct.calc_stack.cur_position; i++)
         printf("%d\n", Proc_struct.calc_stack.data[i]);
     
+    Proc_Dump(&Proc_struct);
+
+    RAM_Draw_in_file(stdout, &Proc_struct);
     // printf("register_buf:\n");
     // for (size_t i = 0; i < COUNT_OF_REG; i++)
     //     printf("%d\n", Proc_struct.register_buf[i]);
@@ -43,6 +48,7 @@ int main() {
     Proc_Dtor(&Proc_struct);
 
     fclose(input_file);
+    fclose(draw_file);
     fclose(LogFile);
 
     fprintf(stdout, "END WITH SUCCESS");

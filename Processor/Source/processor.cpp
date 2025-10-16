@@ -19,8 +19,7 @@ void processor(ProcStruct* Proc_struct) { // each command has argument (it can b
     
     while (Proc_struct -> bite_code.ind_counter  <  Proc_struct -> bite_code.size &&
         Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter]  !=  CMD_HLT) 
-        {
-            
+    {        
         int code_of_cmd = Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter];
         
         CmdStruct* info_of_cmd = find_cmd_in_arr(Proc_struct, code_of_cmd);
@@ -303,9 +302,8 @@ CalcErr_t Proc_Verify (ProcStruct* Proc_struct, const char* checking_function) {
 }
 
 CalcErr_t Proc_Dump(ProcStruct* Proc_struct) {
-
-    #if defined(DEBUG_STACK_VERIFY) || defined(DEBUG_CANARY) || defined(DEBUG_HASH)
-
+    assert(Proc_struct);
+    
         if (Proc_struct == NULL) {
             fprintf(LogFile, "Calc_Dump: NULL pointer to ProcStruct" "\n\n");
             return DUMP_FAILED;
@@ -322,35 +320,60 @@ CalcErr_t Proc_Dump(ProcStruct* Proc_struct) {
         }
 
         fprintf(LogFile, "Calc_Dump prints:" "\n");
-        fprintf(LogFile, "[%p]" "\n", Proc_struct);
+        fprintf(LogFile, "[%p]" "\n\n", Proc_struct);
         fprintf(LogFile, "Bite code structure:" "\n");
         fprintf(LogFile, "{" "\n");
-        fprintf(LogFile, "size = %d" "\n", calc_errors -> bite_code.size);
+        fprintf(LogFile, "size = %d" "\n", Proc_struct -> bite_code.size);
         fprintf(LogFile, "buffer:" "\n");
-            fprintf(LogFile, "\t" "{" "\n");
+        fprintf(LogFile, "{" "\n");
         
-                for (size_t el_num = 0; el_num < Proc_struct -> bite_code.size; el_num++) 
-                    fprintf(LogFile, "\t\t" "[%d] = %d" "\n", el_num, Proc_struct -> bite_code.buffer[el_num]);
+            for (size_t el_num = 0; el_num < Proc_struct -> bite_code.size; el_num++) 
+                fprintf(LogFile, "\t" "[%d] = %d" "\n", el_num, Proc_struct -> bite_code.buffer[el_num]);
         
-            fprintf(LogFile, "\t" "}" "\n");
+        fprintf(LogFile, "}" "\n\n");
         
-        fprintf(LogFile, "Register buffer:" "\n");
-            fprintf(LogFile, "\t" "{" "\n");
-        
-                for (size_t el_num = 0; el_num < COUNT_OF_REG; el_num++) 
-                    fprintf(LogFile, "\t\t" "[%d] = %d" "\n", el_num, Proc_struct -> register_buf[el_num]);
-        
-            fprintf(LogFile, "\t" "}" "\n");
 
-        Stack_Dump( &(calculator -> calc_stack));
+        fprintf(LogFile, "Register buffer:" "\n");
+        fprintf(LogFile, "{" "\n");
+        
+            for (size_t el_num = 0; el_num < COUNT_OF_REG; el_num++) 
+                fprintf(LogFile, "\t" "[%d] = %d" "\n", el_num, Proc_struct -> register_buf[el_num]);
+        
+        fprintf(LogFile, "}" "\n\n");
+
+
+        fprintf(LogFile, "Calculation stack:" "\n");
+        fprintf(LogFile, "{" "\n");
+        
+            for (size_t el_num = 0; el_num < Proc_struct -> calc_stack.cur_position; el_num++)
+                fprintf(LogFile, "\t" "[%d] = %d\n", el_num, Proc_struct -> calc_stack.data[el_num]);
+
+        fprintf(LogFile, "}" "\n\n");
+
+
+        fprintf(LogFile, "Return stack:" "\n");
+        fprintf(LogFile, "{" "\n");
+        
+            for (size_t el_num = 0; el_num < Proc_struct -> return_stack.cur_position; el_num++)
+                fprintf(LogFile, "\t" "[%d] = %d\n", el_num, Proc_struct -> return_stack.data[el_num]);
+
+        fprintf(LogFile, "}" "\n\n");
+
+
+        fprintf(LogFile, "RAM:" "\n");
+        fprintf(LogFile, "{" "\n");
+        
+            for (size_t el_num = 1; el_num <= CAPASITY_OF_RAM; el_num++) {
+                fprintf(LogFile, "%d ", Proc_struct -> RAM_buf[el_num - 1]);
+                if (el_num % RAM_SIZE_X == 0)
+                    fprintf(LogFile, "\n");
+            }
+
+        fprintf(LogFile, "}" "\n\n");        
+
+        // Stack_Dump( &(Proc_struct -> calc_stack));
         
         fprintf(LogFile, "\n\n");
-        
-    #else
-        
-        return RELEASE_MODE;
-        
-    #endif
-    
-        return DUMP_SUCCESS;
+            
+    return DUMP_SUCCESS;
 }

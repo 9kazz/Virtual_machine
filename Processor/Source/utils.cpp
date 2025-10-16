@@ -46,7 +46,7 @@ CmdStruct* create_cmd_info_arr(void) {
     ONE_CMD_INFO(17, CALL,  Call_command)
     ONE_CMD_INFO(18, RET,   Return_to_call_RET)
     ONE_CMD_INFO(19, PUSHM, Push_from_RAM_PUSHM)
-    ONE_CMD_INFO(20, POPM, Pop_to_RAM_POPM)
+    ONE_CMD_INFO(20, POPM,  Pop_to_RAM_POPM)
 
     return cmd_info_arr;
 }
@@ -70,10 +70,18 @@ CmdStruct* find_cmd_in_arr(ProcStruct* Proc_struct, int code_of_cmd) {
 }
 
 int* create_bite_code_buf (FILE* input_file, size_t* bite_code_size) {
+    assert(input_file);
+    assert(bite_code_size);
+
+    size_t count_of_cmd = 0;
+    int    signature    = 0;
+    int    version      = 0;
+
+    fscanf(input_file, "%d %d %d", &count_of_cmd, &version, &signature);
 
     *bite_code_size = size_of_file(input_file);
 
-    int* bite_code_buf = (int*) calloc(*bite_code_size, sizeof(int));
+    SAFE_CALLOC(bite_code_buf, *bite_code_size, int)
 
     int command  = 0;
     int argument = 0;
@@ -109,4 +117,17 @@ size_t size_of_file (FILE* file_input) {
         }
     
     return file_info.st_size;         
+}
+
+CalcErr_t RAM_Draw_in_file (FILE* draw_file, ProcStruct* Proc_struct) {
+    assert(draw_file);
+    assert(Proc_struct);
+    
+    for (size_t el_num = 1; el_num <= CAPASITY_OF_RAM; el_num++) {
+        fprintf(draw_file, "%c ", Proc_struct -> RAM_buf[el_num - 1]);
+        if (el_num % RAM_SIZE_X == 0)
+            fprintf(draw_file, "\n");
+    }
+
+    return SUCCESS;
 }

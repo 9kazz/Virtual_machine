@@ -14,7 +14,9 @@
 const int COUNT_OF_REG          =  8;
 const int MAX_COUNT_OF_CMD      =  32;
 const int RETURN_STACK_CAPACITY =  32;
-const int CAPASITY_OF_RAM       = 100;
+const int RAM_SIZE_X            =  40;
+const int RAM_SIZE_Y            =  40;
+const int CAPASITY_OF_RAM       = RAM_SIZE_X * RAM_SIZE_Y;
 
 
 enum errors_and_success {
@@ -123,5 +125,7 @@ CmdStruct* find_cmd_in_arr     (ProcStruct* Proc_struct, int code_of_cmd);
 int*   create_bite_code_buf (FILE* input_file, size_t* bite_code_size);
 
 size_t size_of_file         (FILE* file_input);
+
+CalcErr_t RAM_Draw_in_file  (FILE* draw_file, ProcStruct* Proc_struct);
 
 #endif
