@@ -16,13 +16,16 @@
 
 FILE* LogFile = fopen("errors.log", "w");
 
-int main() {
-    FILE* input_file = fopen("../byte_code.txt",  "r");
-    FILE* draw_file  = fopen("../draw.txt", "w");
+int main(int argc, char* argv[]) {
+
+    FILE* input_file = NULL;
+    // FILE* draw_file  = fopen("../draw.txt", "w");
+
+    command_line_flags(argc, argv, &input_file);
 
     assert(LogFile);
     assert(input_file);
-    assert(draw_file);
+    // assert(draw_file);
 
     int RAM[CAPASITY_OF_RAM] = {0};
 
@@ -48,7 +51,7 @@ int main() {
     Proc_Dtor(&Proc_struct);
 
     fclose(input_file);
-    fclose(draw_file);
+    // fclose(draw_file);
     fclose(LogFile);
 
     fprintf(stdout, "END WITH SUCCESS");

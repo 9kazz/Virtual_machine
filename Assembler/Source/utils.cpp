@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <assert.h>
+#include <unistd.h>
 
 #include "utils.h"
 #include "assembler.h"
@@ -147,4 +148,30 @@ int my_strcmp(const char* str1, const char* str2) {
     }
 
     return *str1 - *str2;
+}
+
+void command_line_flags(int argc, char* argv[], FILE** input_file, FILE** output_file) {
+
+    int opt = 0;
+
+    while ( (opt = getopt(argc, argv, "i:o:")) != -1) 
+    {
+        switch (opt) 
+        {
+            case 'i':
+                *input_file = fopen(optarg, "r");
+                break;
+
+            case 'o':
+                *output_file = fopen(optarg, "w");
+                break;
+
+            case '?':
+                fprintf(stderr, "command_line_flags: unknown flag (%c)\n", optarg);
+                break;
+
+            default:
+                fprintf(stderr, "command_line_flags: unexpectid error\n");
+        }
+    }
 }

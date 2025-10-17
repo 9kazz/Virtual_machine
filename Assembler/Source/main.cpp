@@ -9,9 +9,13 @@
 #include "utils.h"
 #include "assembler.h"
 
-int main() {
-    FILE* input_file  = fopen("input_file.txt",  "r");
-    FILE* output_file = fopen("../byte_code.txt", "w");
+int main(int argc, char* argv[]) {
+
+    FILE* input_file  = NULL;
+    FILE* output_file = NULL;
+    
+    command_line_flags(argc, argv, &input_file, &output_file);
+
     assert(input_file);
     assert(output_file);
 

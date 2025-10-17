@@ -18,7 +18,7 @@ void processor(ProcStruct* Proc_struct) { // each command has argument (it can b
 
     
     while (Proc_struct -> bite_code.ind_counter  <  Proc_struct -> bite_code.size &&
-        Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter]  !=  CMD_HLT) 
+           Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter]  !=  CMD_HLT) 
     {        
         int code_of_cmd = Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter];
         

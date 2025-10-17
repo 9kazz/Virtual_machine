@@ -128,4 +128,6 @@ size_t size_of_file         (FILE* file_input);
 
 CalcErr_t RAM_Draw_in_file  (FILE* draw_file, ProcStruct* Proc_struct);
 
+void command_line_flags     (int argc, char* argv[], FILE** input_file);
+
 #endif

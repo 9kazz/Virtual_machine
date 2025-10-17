@@ -25,9 +25,11 @@ void   listing_byte_code     (FILE* listing_file, asm_struct Assembler,
                               char* command_str,  char*     argument_str,
                               int   command_int,  int       argument_int);
 
-void listing_labeles_array   (FILE* listing_file, int*   label_array);        
+void  listing_labeles_array  (FILE* listing_file, int*   label_array);        
 
-int    my_strcmp             (const char* str1,      const char* str2);
+int   my_strcmp              (const char* str1,      const char* str2);
+
+void  command_line_flags     (int argc, char* argv[], FILE** input_file, FILE** output_file);
 
 
 #define SAFE_CALLOC(name, size_of_buf, el_type)                                     \

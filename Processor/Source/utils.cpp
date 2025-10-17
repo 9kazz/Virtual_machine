@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <assert.h>
+#include <unistd.h>
 
 #include "utils.h"
 #include "processor.h"
@@ -64,8 +65,8 @@ CmdStruct* find_cmd_in_arr(ProcStruct* Proc_struct, int code_of_cmd) {
 
         ++el_num;
     }
-
-    fprintf(stderr, "find_cmd_in_arr: can`t find this command (%d) in cmd_info_array\n", code_of_cmd);
+    
+    fprintf(stderr, "find_cmd_in_arr: can`t find this command (%d) in cmd_info_array (ind = %d)\n", code_of_cmd, Proc_struct -> bite_code.ind_counter);
     return NULL;
 }
 
@@ -130,4 +131,26 @@ CalcErr_t RAM_Draw_in_file (FILE* draw_file, ProcStruct* Proc_struct) {
     }
 
     return SUCCESS;
+}
+
+void command_line_flags(int argc, char* argv[], FILE** input_file) {
+
+    int opt = 0;
+
+    while ( (opt = getopt(argc, argv, "i:")) != -1) 
+    {
+        switch (opt) 
+        {
+            case 'i':
+                *input_file = fopen(optarg, "r");
+                break;
+
+            case '?':
+                fprintf(stderr, "command_line_flags: unknown flag (%c)\n", optarg);
+                break;
+
+            default:
+                fprintf(stderr, "command_line_flags: unexpectid error\n");
+        }
+    }
 }
