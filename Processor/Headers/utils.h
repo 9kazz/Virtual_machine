@@ -12,11 +12,11 @@
                             /*CONSTANTS*/
 
 const int COUNT_OF_REG          =  8;
-const int MAX_COUNT_OF_CMD      =  32;
-const int RETURN_STACK_CAPACITY =  32;
+const int MAX_COUNT_OF_CMD      =  128;
+const int RETURN_STACK_CAPACITY =  128;
 const int RAM_SIZE_X            =  40;
 const int RAM_SIZE_Y            =  40;
-const int CAPASITY_OF_RAM       = RAM_SIZE_X * RAM_SIZE_Y;
+const int CAPASITY_OF_RAM       =  RAM_SIZE_X * RAM_SIZE_Y + 1;
 
 
 enum errors_and_success {
@@ -81,7 +81,9 @@ struct ProcStruct {
 
                             /*DEFINES*/
 
-#define CALC_CTOR(name, RAM)                                                                   \
+#define CALC_CTOR(name)                                                                        \
+                                                                                               \
+    int RAM[CAPASITY_OF_RAM] = {0};                                                            \
                                                                                                \
     CmdStruct* name##_cmd_info_arr = create_cmd_info_arr();                                    \
                                                                                                \
@@ -120,7 +122,6 @@ struct ProcStruct {
                             /*FUNCTIONS*/
 
 CmdStruct* create_cmd_info_arr (void);
-CmdStruct* find_cmd_in_arr     (ProcStruct* Proc_struct, int code_of_cmd);
 
 int*   create_bite_code_buf (FILE* input_file, size_t* bite_code_size);
 

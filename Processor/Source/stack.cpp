@@ -7,7 +7,7 @@
 #include "stack.h"
 
 
-StackErr_t Stack_Ctor(stack_struct* stack, int size_of_stack) {
+StackErr_t Stack_Ctor(stack_struct* stack, size_t size_of_stack) {
 
     Stack_Verify_Ctor(stack, size_of_stack);
 
@@ -35,7 +35,7 @@ StackErr_t Stack_Ctor(stack_struct* stack, int size_of_stack) {
 
     #else
 
-        stack_t* temp_pointer = (stack_t*) calloc( (size_t) size_of_stack, sizeof(stack -> data[0]));
+        stack_t* temp_pointer = (stack_t*) calloc(size_of_stack, sizeof(stack -> data[0]));
 
         if (temp_pointer == NULL) {
             fprintf(LogFile, "Stack_Ctor: NULL pointer" "\n\n");
@@ -44,7 +44,7 @@ StackErr_t Stack_Ctor(stack_struct* stack, int size_of_stack) {
 
         stack -> data = temp_pointer;
 
-        for (int i = 0; i < size_of_stack; i++)
+        for (size_t i = 0; i < size_of_stack; i++)
             stack -> data[i] = POISON;
 
         stack -> capacity = size_of_stack;
@@ -104,12 +104,13 @@ StackErr_t Stack_Dtor(stack_struct* stack) {
 
     stack -> cur_position = 0;
 
-    free(stack); 
-
     #ifdef DEBUG_HESH
-        stack_hesh_function(stack);
+    stack_hesh_function(stack);
     #endif
+
     Stack_Verify(stack, "Stack_Dtor");
+    
+    free(stack -> data); 
 
     return VERIFY_SUCCESS;
 }

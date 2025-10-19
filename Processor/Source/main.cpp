@@ -27,9 +27,7 @@ int main(int argc, char* argv[]) {
     assert(input_file);
     // assert(draw_file);
 
-    int RAM[CAPASITY_OF_RAM] = {0};
-
-    CALC_CTOR(Proc_struct, RAM)
+    CALC_CTOR(Proc_struct)
 
     // printf("cmd_info_arr:\n");
     // for (size_t i = 0; i < MAX_COUNT_OF_CMD; i++)
@@ -41,7 +39,7 @@ int main(int argc, char* argv[]) {
     for (size_t i = 0; i < Proc_struct.calc_stack.cur_position; i++)
         printf("%d\n", Proc_struct.calc_stack.data[i]);
     
-    Proc_Dump(&Proc_struct);
+    Proc_Dump(LogFile, &Proc_struct);
 
     RAM_Draw_in_file(stdout, &Proc_struct);
     // printf("register_buf:\n");

@@ -7,11 +7,12 @@
 #include "stack_utils.h"
 #include "stack.h"
 
-void      processor    (ProcStruct*   Proc_struct);
+CalcErr_t processor    (ProcStruct*   Proc_struct);
 
-CalcErr_t Proc_Dtor    (ProcStruct* Proc_struct);
-CalcErr_t Proc_Verify  (ProcStruct* Proc_struct, const char* checking_function);
-CalcErr_t Proc_Dump    (ProcStruct* Proc_struct);
+CalcErr_t Proc_Dtor            (ProcStruct* Proc_struct);
+CalcErr_t Proc_Verify          (ProcStruct* Proc_struct, const char* checking_function);
+CalcErr_t Proc_Dump            (FILE* output_file, ProcStruct* Proc_struct);
+CalcErr_t Proc_dump_stack_only (FILE* output_file, ProcStruct* Proc_struct);
 
 StackErr_t Stack_Push_Proc (ProcStruct* Proc_struct);
 StackErr_t Stack_Pop_Proc  (ProcStruct* Proc_struct);
@@ -40,4 +41,5 @@ CalcErr_t Jump_Above_Equal_JAE (ProcStruct* Proc_struct);
 CalcErr_t Jump_Equal_JE        (ProcStruct* Proc_struct);
 CalcErr_t Jump_Not_Equal_JNE   (ProcStruct* Proc_struct);
 
+CmdStruct* find_cmd_in_arr(ProcStruct* Proc_struct, int code_of_cmd);
 #endif

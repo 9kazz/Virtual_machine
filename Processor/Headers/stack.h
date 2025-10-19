@@ -56,7 +56,7 @@
     Stack_Ctor(&stack, size_of_stack);
 
 
-StackErr_t Stack_Ctor   (stack_struct* stack, int     size_of_stack);
+StackErr_t Stack_Ctor   (stack_struct* stack, size_t  size_of_stack);
 
 StackErr_t Stack_Push   (stack_struct* stack, stack_t value);
 

@@ -14,22 +14,18 @@
 #include "stack.h"
 #include "utils.h"
 
-void processor(ProcStruct* Proc_struct) { // each command has argument (it can be fictive (POISON))
-
+CalcErr_t processor(ProcStruct* Proc_struct) { // each command has argument (it can be fictive (POISON))
     
     while (Proc_struct -> bite_code.ind_counter  <  Proc_struct -> bite_code.size &&
            Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter]  !=  CMD_HLT) 
     {        
         int code_of_cmd = Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter];
         
-        CmdStruct* info_of_cmd = find_cmd_in_arr(Proc_struct, code_of_cmd);
-
-        info_of_cmd -> cmd_func(Proc_struct);
+        Proc_struct -> cmd_info_arr[code_of_cmd].cmd_func (Proc_struct);
 
         Proc_struct -> bite_code.ind_counter += 2; // each command has argument (it can be fictive (POISON))
     }
-
-    return;
+    return SUCCESS;
 }
 
 #define STACK_ARIFMETIC(operator, func_name)                                 \
@@ -40,7 +36,7 @@ CalcErr_t Stack_Arif_##func_name (ProcStruct* Proc_struct) {                 \
     int operand_1 = Stack_Pop( &(Proc_struct -> calc_stack));                \
     int operand_2 = Stack_Pop( &(Proc_struct -> calc_stack));                \
                                                                              \
-    int result = (int) (operand_2 operator operand_1);                       \
+    int result =  operand_2 operator operand_1;                              \
                                                                              \
     Stack_Push(&(Proc_struct -> calc_stack), result);                        \
                                                                              \
@@ -51,6 +47,8 @@ STACK_ARIFMETIC(+, Add)
 STACK_ARIFMETIC(-, Sub)
 STACK_ARIFMETIC(*, Mul)
 STACK_ARIFMETIC(/, Div)
+
+#undef STACK_ARIFMETIC
 
 CalcErr_t Stack_Arif_Sqrt (ProcStruct* Proc_struct) {                       
     assert(Proc_struct);                                                
@@ -131,7 +129,7 @@ CalcErr_t Stack_In (ProcStruct* Proc_struct) {
 CalcErr_t Jump_to_JMP (ProcStruct* Proc_struct) {
     assert(Proc_struct);
 
-    int ind_to_jump = Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter + 1];
+    size_t ind_to_jump = Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter + 1];
 
     Proc_struct -> bite_code.ind_counter = ind_to_jump;
 
@@ -160,6 +158,8 @@ JUMP_IF(>, Above_JA)
 JUMP_IF(>=, Above_Equal_JAE)
 JUMP_IF(==, Equal_JE)
 JUMP_IF(!=, Not_Equal_JNE)
+
+#undef JUMP_IF
 
 CalcErr_t Call_command (ProcStruct* Proc_struct) {
     assert(Proc_struct);
@@ -194,7 +194,7 @@ CalcErr_t Push_from_RAM_PUSHM(ProcStruct* Proc_struct) {
 
     int register_num = Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter + 1];
     
-    size_t RAM_ind   = Proc_struct -> register_buf[register_num];
+    int RAM_ind   = Proc_struct -> register_buf[register_num];
 
     stack_struct* stack = &(Proc_struct -> calc_stack);
     int pushing_value   =   Proc_struct -> RAM_buf[RAM_ind];
@@ -209,7 +209,7 @@ CalcErr_t Pop_to_RAM_POPM(ProcStruct* Proc_struct) {
 
     int register_num = Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter + 1];
     
-    size_t RAM_ind   = Proc_struct -> register_buf[register_num];
+    int RAM_ind   = Proc_struct -> register_buf[register_num];
 
     stack_struct* stack = &(Proc_struct -> calc_stack);
 
@@ -225,12 +225,11 @@ CalcErr_t Proc_Dtor (ProcStruct* Proc_struct) {
 
     size_t size_of_struct  = sizeof(*Proc_struct);
 
-    stack_struct stack     = Proc_struct -> calc_stack;
-    int* bite_code_pointer = Proc_struct -> bite_code.buffer;
+    Stack_Dtor(&(Proc_struct -> calc_stack));
+    Stack_Dtor(&(Proc_struct -> return_stack));
 
-    Stack_Dtor(&stack);
-
-    free(bite_code_pointer);
+    free(Proc_struct -> bite_code.buffer);
+    free(Proc_struct -> cmd_info_arr);
     
     memset(Proc_struct, POISON, size_of_struct);
 
@@ -296,84 +295,144 @@ CalcErr_t Proc_Verify (ProcStruct* Proc_struct, const char* checking_function) {
             return error_code;
         }        
 
-    #endif
+        if (Proc_struct -> RAM_buf == NULL) {
 
+            fprintf(LogFile, "Calc_Verify: NULL poiner to RAM buffer in %s" "\n", checking_function);
+            fprintf(LogFile, "Error code: %d (NULL_POINT_REG)" "\n\n", NULL_POINT_REG);
+
+            Proc_Dump(Proc_struct);
+
+            error_code = error_code | NULL_POINT_;       
+            
+            fprintf(LogFile, "Calc_Verify: verification ended with error code: %d\n", error_code);
+            return error_code;
+        }        
+
+    #endif
+//TODO:
     return error_code;
 }
 
-CalcErr_t Proc_Dump(ProcStruct* Proc_struct) {
+CalcErr_t Proc_Dump(FILE* output_file, ProcStruct* Proc_struct) {
     assert(Proc_struct);
     
         if (Proc_struct == NULL) {
-            fprintf(LogFile, "Calc_Dump: NULL pointer to ProcStruct" "\n\n");
+            fprintf(output_file, "Calc_Dump: NULL pointer to ProcStruct" "\n\n");
             return DUMP_FAILED;
         }
 
         if (Proc_struct -> bite_code.buffer == NULL) {
-            fprintf(LogFile, "Calc_Dump: NULL pointer to bite code buffer" "\n\n");
+            fprintf(output_file, "Calc_Dump: NULL pointer to bite code buffer" "\n\n");
             return DUMP_FAILED;
         }        
 
         if (Proc_struct -> register_buf == NULL) {
-            fprintf(LogFile, "Calc_Dump: NULL pointer to register buffer" "\n\n");
+            fprintf(output_file, "Calc_Dump: NULL pointer to register buffer" "\n\n");
             return DUMP_FAILED;
         }
 
-        fprintf(LogFile, "Calc_Dump prints:" "\n");
-        fprintf(LogFile, "[%p]" "\n\n", Proc_struct);
-        fprintf(LogFile, "Bite code structure:" "\n");
-        fprintf(LogFile, "{" "\n");
-        fprintf(LogFile, "size = %d" "\n", Proc_struct -> bite_code.size);
-        fprintf(LogFile, "buffer:" "\n");
-        fprintf(LogFile, "{" "\n");
+        fprintf(output_file, "Calc_Dump prints:" "\n");
+        fprintf(output_file, "[%p]" "\n\n", Proc_struct);
+        fprintf(output_file, "Bite code structure:" "\n");
+        fprintf(output_file, "{" "\n");
+        fprintf(output_file, "size = %ld" "\n", Proc_struct -> bite_code.size);
+        fprintf(output_file, "buffer:" "\n");
+        fprintf(output_file, "{" "\n");
         
             for (size_t el_num = 0; el_num < Proc_struct -> bite_code.size; el_num++) 
-                fprintf(LogFile, "\t" "[%d] = %d" "\n", el_num, Proc_struct -> bite_code.buffer[el_num]);
+                fprintf(output_file, "\t" "[%ld] = %d" "\n", el_num, Proc_struct -> bite_code.buffer[el_num]);
         
-        fprintf(LogFile, "}" "\n\n");
+        fprintf(output_file, "}" "\n\n");
         
 
-        fprintf(LogFile, "Register buffer:" "\n");
-        fprintf(LogFile, "{" "\n");
+        fprintf(output_file, "Register buffer:" "\n");
+        fprintf(output_file, "{" "\n");
         
             for (size_t el_num = 0; el_num < COUNT_OF_REG; el_num++) 
-                fprintf(LogFile, "\t" "[%d] = %d" "\n", el_num, Proc_struct -> register_buf[el_num]);
+                fprintf(output_file, "\t" "[%ld] = %d" "\n", el_num, Proc_struct -> register_buf[el_num]);
         
-        fprintf(LogFile, "}" "\n\n");
+        fprintf(output_file, "}" "\n\n");
 
 
-        fprintf(LogFile, "Calculation stack:" "\n");
-        fprintf(LogFile, "{" "\n");
+        fprintf(output_file, "Calculation stack:" "\n");
+        fprintf(output_file, "{" "\n");
         
             for (size_t el_num = 0; el_num < Proc_struct -> calc_stack.cur_position; el_num++)
-                fprintf(LogFile, "\t" "[%d] = %d\n", el_num, Proc_struct -> calc_stack.data[el_num]);
+                fprintf(output_file, "\t" "[%ld] = %d\n", el_num, Proc_struct -> calc_stack.data[el_num]);
 
-        fprintf(LogFile, "}" "\n\n");
+        fprintf(output_file, "}" "\n\n");
 
+        //---------------------------------------------
 
-        fprintf(LogFile, "Return stack:" "\n");
-        fprintf(LogFile, "{" "\n");
+        fprintf(output_file, "Return stack:" "\n");
+        fprintf(output_file, "{" "\n");
         
             for (size_t el_num = 0; el_num < Proc_struct -> return_stack.cur_position; el_num++)
-                fprintf(LogFile, "\t" "[%d] = %d\n", el_num, Proc_struct -> return_stack.data[el_num]);
+                fprintf(output_file, "\t" "[%ld] = %d\n", el_num, Proc_struct -> return_stack.data[el_num]);
 
-        fprintf(LogFile, "}" "\n\n");
+        fprintf(output_file, "}" "\n\n");
 
 
-        fprintf(LogFile, "RAM:" "\n");
-        fprintf(LogFile, "{" "\n");
+        fprintf(output_file, "RAM:" "\n");
+        fprintf(output_file, "{" "\n");
         
             for (size_t el_num = 1; el_num <= CAPASITY_OF_RAM; el_num++) {
-                fprintf(LogFile, "%d ", Proc_struct -> RAM_buf[el_num - 1]);
+                fprintf(output_file, "%d ", Proc_struct -> RAM_buf[el_num - 1]);
                 if (el_num % RAM_SIZE_X == 0)
-                    fprintf(LogFile, "\n");
+                    fprintf(output_file, "\n");
             }
 
-        fprintf(LogFile, "}" "\n\n");        
+        fprintf(output_file, "}" "\n\n");        
 
         // Stack_Dump( &(Proc_struct -> calc_stack));
         
-        fprintf(LogFile, "\n\n");
+        fprintf(output_file, "\n\n");
             
     return DUMP_SUCCESS;
+}
+
+CalcErr_t Proc_dump_stack_only (FILE* output_file, ProcStruct* Proc_struct) {
+    assert(Proc_struct);
+    assert(output_file);
+
+        if (Proc_struct == NULL) {
+            fprintf(output_file, "Calc_Dump: NULL pointer to ProcStruct" "\n\n");
+            return DUMP_FAILED;
+        }
+
+        if (Proc_struct -> bite_code.buffer == NULL) {
+            fprintf(output_file, "Calc_Dump: NULL pointer to bite code buffer" "\n\n");
+            return DUMP_FAILED;
+        }        
+
+        if (Proc_struct -> register_buf == NULL) {
+            fprintf(output_file, "Calc_Dump: NULL pointer to register buffer" "\n\n");
+            return DUMP_FAILED;
+        }
+
+            for (size_t el_num = 0; el_num < Proc_struct -> calc_stack.cur_position; el_num++)
+                fprintf(output_file, "\t" "[%ld] = %d\n", el_num, Proc_struct -> calc_stack.data[el_num]);
+
+        fprintf(output_file, "\n\n");
+
+    return DUMP_SUCCESS;
+}
+
+
+CmdStruct* find_cmd_in_arr(ProcStruct* Proc_struct, int code_of_cmd) {
+    assert(Proc_struct);
+
+    int el_num = 0;
+
+    while (el_num < MAX_COUNT_OF_CMD &&
+           Proc_struct -> cmd_info_arr[el_num].code != 0)
+    {
+        if (Proc_struct -> cmd_info_arr[el_num].code == code_of_cmd)
+            return &(Proc_struct -> cmd_info_arr[el_num]);
+
+        ++el_num;
+    }
+    
+    fprintf(stderr, "find_cmd_in_arr: can`t find this command (%d) in cmd_info_array (ind = %ld)\n", code_of_cmd, Proc_struct -> bite_code.ind_counter);
+    return NULL;
 }

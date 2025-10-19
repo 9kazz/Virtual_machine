@@ -84,13 +84,14 @@ size_t fill_byte_code_buf (char** pointers_array, asm_struct* Assembler, int* by
     return count_of_commands_without_labeles;
 }
 
-#define ELSE_IF_CMD(cmd_name)                              \
-    else if (strcmp(command_str, #cmd_name) == 0)          \
-        return CMD_##cmd_name; 
 
 int command_identify (const char* command_str) {
     assert(command_str);
     
+    #define ELSE_IF_CMD(cmd_name)                              \
+        else if (strcmp(command_str, #cmd_name) == 0)          \
+            return CMD_##cmd_name; 
+
     if (strcmp(command_str, "PUSH") == 0)
         return CMD_PUSH;
 
@@ -121,6 +122,8 @@ int command_identify (const char* command_str) {
     ELSE_IF_CMD(PUSHM)
     ELSE_IF_CMD(POPM)
 
+    #undef ELSE_IF_CMD
+
     else 
         return UNKNOWN_COM;
 }
@@ -136,16 +139,16 @@ int argument_identify (int count_of_arg, int command_int, const char* argument_s
 
         case 2: // two arguments
 
-            if  (command_int >= CMD_PUSHR &&                                // CMD_PUSHR = 33, CMD_POPR = 34, CMD_IN = 35
-                command_int <= CMD_IN)
+            if  (command_int >= CMD_PUSHR &&                                 // CMD_PUSHR = 33, CMD_POPR = 34, CMD_IN = 35
+                 command_int <= CMD_IN)
                 return register_num(argument_str);
 
-            else if (command_int >= CMD_JMP &&                              // CMD_JMP = 64, CMD_JB  = 65, CMD_JBE = 66, CMD_JA    = 67
-                    command_int <= CMD_CALL)                                // CMD_JAE = 68, CMD_JE  = 69, CMD_JNE = 70, CMD_CALL = 71
+            else if (command_int >= CMD_JMP &&                               // CMD_JMP = 64, CMD_JB  = 65, CMD_JBE = 66, CMD_JA   = 67
+                     command_int <= CMD_CALL)                                // CMD_JAE = 68, CMD_JE  = 69, CMD_JNE = 70, CMD_CALL = 71
                 return identify_label(argument_str, label_array);
 
-            else if (command_int >= CMD_PUSHM &&                            // CMD_PUSHM = 73, CMD_POPM = 74
-                    command_int <= CMD_POPM)
+            else if (command_int >= CMD_PUSHM &&                             // CMD_PUSHM = 73, CMD_POPM = 74
+                     command_int <= CMD_POPM)
                 return indentify_register_RAM( (char*) argument_str);
 
             else
@@ -233,6 +236,8 @@ int indentify_register_RAM(char* argument_str) {
     assert(argument_str);
 
     int Register = -1;
+
+    static int len = strlen ("[AX]");
 
     if (argument_str[0] == '[' &&
         argument_str[4] == ']') 

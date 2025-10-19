@@ -77,15 +77,14 @@ size_t str_change_char (char* asm_code_buf, char original_char_code, char new_ch
 
 char** fill_point_ar (char** pointers_array, char* asm_code_buf, size_t count_of_lines) {
     
-    char* end_of_str = asm_code_buf;
-    
+    char* start_of_str = asm_code_buf;
     size_t i = 0;
 
     while (i < count_of_lines && 
-           end_of_str != NULL) 
+           start_of_str != NULL) 
     {
-        *(pointers_array + (i++)) = end_of_str; 
-        end_of_str = strchr(end_of_str, '\0') + 1;
+        *(pointers_array + (i++)) = start_of_str; 
+        start_of_str = strchr(start_of_str, '\0') + 1;
     }
 
     *(pointers_array + i) = NULL; 
