@@ -4,12 +4,13 @@
 #include <stdio.h>
 
 struct asm_struct;
-// struct CmdStruct;
+struct CmdStruct;
 
-// struct CmdStruct {
-//     const char* name;
-//     int         code;
-// };
+struct CmdStruct {
+    const char* name;
+    int         code;
+    int         hash;
+};
 
 struct asm_struct {
     char*  asm_code_buf;
@@ -18,7 +19,7 @@ struct asm_struct {
     int*   labeles_array;
     size_t count_of_commands;
     size_t ind_counter;
-    // CmdStruct* cmd_info_arr;
+    CmdStruct* cmd_info_arr;
 };
 
 int    create_pointers_array (FILE* file_input,     asm_struct* Assembler);

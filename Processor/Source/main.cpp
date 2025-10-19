@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
     assert(input_file);
     // assert(draw_file);
 
-    CALC_CTOR(Proc_struct)
+    SPU_CTOR(Proc_struct)
 
     // printf("cmd_info_arr:\n");
     // for (size_t i = 0; i < MAX_COUNT_OF_CMD; i++)

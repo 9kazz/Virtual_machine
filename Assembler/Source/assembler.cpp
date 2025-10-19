@@ -37,6 +37,56 @@ int assembler (asm_struct* Assembler) {
     return END_SUCCESS;
 }
 
+
+#define ONE_CMD_INFO(cmd_name)                                                                   \
+                                                                                                 \
+CmdStruct cmd_##cmd_name {};                                                                     \
+    cmd_##cmd_name.name     = #cmd_name;                                                         \
+    cmd_##cmd_name.code     = CMD_##cmd_name;                                                    \
+                                                                                                 \
+    const char* str_##cmd_name = #cmd_name;                                                      \
+    int hash_##cmd_name = 0;                                                                     \
+                                                                                                 \
+    for (size_t char_num = 0; str_##cmd_name[char_num] != '\0'; char_num++)                      \
+        hash_##cmd_name = hash_##cmd_name * PRIME_COEF_HASH + str_##cmd_name[char_num];          \
+                                                                                                 \
+    cmd_##cmd_name.hash = hash_##cmd_name;                                                       \
+                                                                                                 \
+cmd_info_arr[CMD_##cmd_name] = cmd_##cmd_name;
+
+
+CmdStruct* create_cmd_info_arr(void) {
+    
+    SAFE_CALLOC(cmd_info_arr, MAX_COUNT_OF_CMD, CmdStruct)
+
+    ONE_CMD_INFO(HLT)
+    ONE_CMD_INFO(PUSH)
+    ONE_CMD_INFO(OUT)
+    ONE_CMD_INFO(ADD)
+    ONE_CMD_INFO(SUB)
+    ONE_CMD_INFO(MUL)
+    ONE_CMD_INFO(DIV)
+    ONE_CMD_INFO(SQRT)
+    ONE_CMD_INFO(PUSHR)
+    ONE_CMD_INFO(POPR)
+    ONE_CMD_INFO(IN)
+    ONE_CMD_INFO(JMP)
+    ONE_CMD_INFO(JB)
+    ONE_CMD_INFO(JBE)
+    ONE_CMD_INFO(JA)
+    ONE_CMD_INFO(JAE)
+    ONE_CMD_INFO(JE)
+    ONE_CMD_INFO(JNE)
+    ONE_CMD_INFO(CALL)
+    ONE_CMD_INFO(RET)
+    ONE_CMD_INFO(PUSHM)
+    ONE_CMD_INFO(POPM)
+
+    return cmd_info_arr;
+}
+
+#undef ONE_CMD_INFO
+
 size_t fill_byte_code_buf (asm_struct* Assembler) {
     assert(Assembler);
 
@@ -67,8 +117,8 @@ size_t fill_byte_code_buf (asm_struct* Assembler) {
             continue;
         }
 
-        int  command_int = command_identify( (const char*) command_str); // each command has argument (it can be fictive (POISON))
-        int argument_int = argument_identify(Assembler, count_of_arg, command_int, (const char*) argument_str);
+        int  command_int = command_identify (Assembler, (const char*)  command_str); // each command has argument (it can be fictive (POISON))
+        int argument_int = argument_identify(Assembler,  count_of_arg, command_int, (const char*) argument_str);
 
         Assembler -> byte_code_buf[ Assembler -> ind_counter ++ ] = command_int;
         Assembler -> byte_code_buf[ Assembler -> ind_counter ++ ] = argument_int;
@@ -84,47 +134,25 @@ size_t fill_byte_code_buf (asm_struct* Assembler) {
 }
 
 
-int command_identify (const char* command_str) {
+int command_identify (asm_struct* Assembler, const char* command_str) {
     assert(command_str);
-    
-    #define ELSE_IF_CMD(cmd_name)                              \
-        else if (strcmp(command_str, #cmd_name) == 0)          \
-            return CMD_##cmd_name; 
+    assert(Assembler);
 
-    if (strcmp(command_str, "PUSH") == 0)
-        return CMD_PUSH;
+    int finding_hash = 0;                                                         
 
-    ELSE_IF_CMD(OUT)
-    ELSE_IF_CMD(HLT)
+    for (size_t char_num = 0; command_str[char_num] != '\0'; char_num++)
+        finding_hash = finding_hash * PRIME_COEF_HASH + command_str[char_num]; 
 
-    ELSE_IF_CMD(ADD)
-    ELSE_IF_CMD(SUB)
-    ELSE_IF_CMD(MUL)
-    ELSE_IF_CMD(DIV)
-    ELSE_IF_CMD(SQRT)
+    for (size_t cmd_info_el = 0; cmd_info_el < MAX_COUNT_OF_CMD; cmd_info_el++) {
 
-    ELSE_IF_CMD(PUSHR)
-    ELSE_IF_CMD(POPR)
-    ELSE_IF_CMD(IN)
+        if (Assembler -> cmd_info_arr[cmd_info_el].hash == finding_hash)
+            return Assembler -> cmd_info_arr[cmd_info_el].code;
 
-    ELSE_IF_CMD(JMP)
-    ELSE_IF_CMD(JB)
-    ELSE_IF_CMD(JBE)
-    ELSE_IF_CMD(JA)
-    ELSE_IF_CMD(JAE)
-    ELSE_IF_CMD(JE)
-    ELSE_IF_CMD(JNE)
+        else
+            continue;
+    }
 
-    ELSE_IF_CMD(CALL)
-    ELSE_IF_CMD(RET)
-
-    ELSE_IF_CMD(PUSHM)
-    ELSE_IF_CMD(POPM)
-
-    #undef ELSE_IF_CMD
-
-    else 
-        return UNKNOWN_COM;
+    return UNKNOWN_COM;
 }
 
 int argument_identify (asm_struct* Assembler, int count_of_arg, int command_int, const char* argument_str) {

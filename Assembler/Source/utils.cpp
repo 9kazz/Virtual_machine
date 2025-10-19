@@ -178,6 +178,7 @@ int Assembler_struct_Dtor (asm_struct* Assembler) {
     free(Assembler -> byte_code_buf);
     free(Assembler -> pointers_array);
     free(Assembler -> labeles_array);
+    free(Assembler -> cmd_info_arr);
 
     return DESTROY_SUC;
 }

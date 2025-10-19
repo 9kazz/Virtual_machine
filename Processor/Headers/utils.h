@@ -81,7 +81,7 @@ struct ProcStruct {
 
                             /*DEFINES*/
 
-#define CALC_CTOR(name)                                                                        \
+#define SPU_CTOR(name)                                                                        \
                                                                                                \
     int RAM[CAPASITY_OF_RAM] = {0};                                                            \
                                                                                                \

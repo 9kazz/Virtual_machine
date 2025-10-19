@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include "utils.h"
 
+const int MAX_COUNT_OF_CMD = 128;
+const int PRIME_COEF_HASH  = 257;
+
 enum function_status {
     END_SUCCESS = 1,
     UNKNOWN_COM = -1,
@@ -42,9 +45,12 @@ const int COMMAND_MAX_LEN  = 32;
 const int COUNT_OF_REG     =  8;
 const int LABEL_BUF_SIZE   = 10;
 
-int    assembler          (asm_struct* Assembler);
+int assembler          (asm_struct* Assembler);
+
+CmdStruct* create_cmd_info_arr(void);
+
 size_t fill_byte_code_buf (asm_struct* Assembler);
-int    command_identify   (const char* command_str);
+int    command_identify   (asm_struct* Assembler, const char* command_str);
 int    argument_identify  (asm_struct* Assembler, int count_of_arg, int command_int,  const char* argument_str);
 
 int    register_num       (const char* argument_str);
@@ -61,6 +67,7 @@ int    indentify_register_RAM (char* argument_str);
         name.asm_code_buf      = NULL;                       \
         name.pointers_array    = NULL;                       \
         name.count_of_commands = 0;                          \
-        name.ind_counter       = 0; 
+        name.ind_counter       = 0;                          \
+        name.cmd_info_arr      = create_cmd_info_arr();
 
 #endif
