@@ -10,6 +10,7 @@ struct CmdStruct {
     const char* name;
     int         code;
     int         hash;
+    size_t      arg_count;
 };
 
 struct asm_struct {

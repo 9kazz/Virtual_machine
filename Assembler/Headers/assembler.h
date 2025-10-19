@@ -7,6 +7,11 @@
 const int MAX_COUNT_OF_CMD = 128;
 const int PRIME_COEF_HASH  = 257;
 
+enum count_of_cmd_args {
+    NO_ARGS = 0,
+    ONE_ARG = 1
+};
+
 enum function_status {
     END_SUCCESS = 1,
     UNKNOWN_COM = -1,
@@ -51,7 +56,7 @@ CmdStruct* create_cmd_info_arr(void);
 
 size_t fill_byte_code_buf (asm_struct* Assembler);
 int    command_identify   (asm_struct* Assembler, const char* command_str);
-int    argument_identify  (asm_struct* Assembler, int count_of_arg, int command_int,  const char* argument_str);
+int    argument_identify  (asm_struct* Assembler, int command_int, char* argument_str);
 
 int    register_num       (const char* argument_str);
 

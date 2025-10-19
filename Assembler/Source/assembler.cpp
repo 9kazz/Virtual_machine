@@ -38,7 +38,7 @@ int assembler (asm_struct* Assembler) {
 }
 
 
-#define ONE_CMD_INFO(cmd_name)                                                                   \
+#define ONE_CMD_INFO(cmd_name, count_of_args)                                                    \
                                                                                                  \
 CmdStruct cmd_##cmd_name {};                                                                     \
     cmd_##cmd_name.name     = #cmd_name;                                                         \
@@ -52,35 +52,37 @@ CmdStruct cmd_##cmd_name {};                                                    
                                                                                                  \
     cmd_##cmd_name.hash = hash_##cmd_name;                                                       \
                                                                                                  \
-cmd_info_arr[CMD_##cmd_name] = cmd_##cmd_name;
+    cmd_##cmd_name.arg_count = count_of_args;                                                    \
+                                                                                                 \
+    cmd_info_arr[CMD_##cmd_name] = cmd_##cmd_name;
 
 
 CmdStruct* create_cmd_info_arr(void) {
     
     SAFE_CALLOC(cmd_info_arr, MAX_COUNT_OF_CMD, CmdStruct)
 
-    ONE_CMD_INFO(HLT)
-    ONE_CMD_INFO(PUSH)
-    ONE_CMD_INFO(OUT)
-    ONE_CMD_INFO(ADD)
-    ONE_CMD_INFO(SUB)
-    ONE_CMD_INFO(MUL)
-    ONE_CMD_INFO(DIV)
-    ONE_CMD_INFO(SQRT)
-    ONE_CMD_INFO(PUSHR)
-    ONE_CMD_INFO(POPR)
-    ONE_CMD_INFO(IN)
-    ONE_CMD_INFO(JMP)
-    ONE_CMD_INFO(JB)
-    ONE_CMD_INFO(JBE)
-    ONE_CMD_INFO(JA)
-    ONE_CMD_INFO(JAE)
-    ONE_CMD_INFO(JE)
-    ONE_CMD_INFO(JNE)
-    ONE_CMD_INFO(CALL)
-    ONE_CMD_INFO(RET)
-    ONE_CMD_INFO(PUSHM)
-    ONE_CMD_INFO(POPM)
+    ONE_CMD_INFO(HLT,   NO_ARGS)
+    ONE_CMD_INFO(PUSH,  ONE_ARG)
+    ONE_CMD_INFO(OUT,   NO_ARGS)
+    ONE_CMD_INFO(ADD,   NO_ARGS)
+    ONE_CMD_INFO(SUB,   NO_ARGS)
+    ONE_CMD_INFO(MUL,   NO_ARGS)
+    ONE_CMD_INFO(DIV,   NO_ARGS)
+    ONE_CMD_INFO(SQRT,  NO_ARGS)
+    ONE_CMD_INFO(PUSHR, ONE_ARG)
+    ONE_CMD_INFO(POPR,  ONE_ARG)
+    ONE_CMD_INFO(IN,    NO_ARGS)
+    ONE_CMD_INFO(JMP,   ONE_ARG)
+    ONE_CMD_INFO(JB,    ONE_ARG)
+    ONE_CMD_INFO(JBE,   ONE_ARG)
+    ONE_CMD_INFO(JA,    ONE_ARG)
+    ONE_CMD_INFO(JAE,   ONE_ARG)
+    ONE_CMD_INFO(JE,    ONE_ARG)
+    ONE_CMD_INFO(JNE,   ONE_ARG)
+    ONE_CMD_INFO(CALL,  ONE_ARG)
+    ONE_CMD_INFO(RET,   NO_ARGS)
+    ONE_CMD_INFO(PUSHM, ONE_ARG)
+    ONE_CMD_INFO(POPM,  ONE_ARG)
 
     return cmd_info_arr;
 }
@@ -94,21 +96,18 @@ size_t fill_byte_code_buf (asm_struct* Assembler) {
     char argument_str[COMMAND_MAX_LEN] = {0};
 
     size_t cmd_num         = 0;
-    int    count_of_arg    = 0;
+    int    sscanf_check    = 0;
 
     size_t count_of_commands_without_labeles = Assembler -> count_of_commands;
 
     while (cmd_num < Assembler -> count_of_commands && 
            Assembler -> pointers_array[cmd_num] != NULL) 
     {
-        count_of_arg = sscanf( (const char*) Assembler -> pointers_array[cmd_num], "%31s %31s", command_str, argument_str); // COMMAND_MAX_LEN = 32
+        sscanf_check = sscanf( (const char*) Assembler -> pointers_array[cmd_num], "%31s %31s", command_str, argument_str); // COMMAND_MAX_LEN = 32
 
-        if (count_of_arg == 0) {                            // TODO: new func
+        if (sscanf_check == 0) {                            // TODO: new func
             fprintf(stderr, "Incorrect ASM-code");
             return 0;
-
-        } else if (count_of_arg == 1) {
-            *argument_str = '\0';
         }
 
         int label_check = fill_label_array(Assembler, command_str, &count_of_commands_without_labeles);
@@ -118,7 +117,7 @@ size_t fill_byte_code_buf (asm_struct* Assembler) {
         }
 
         int  command_int = command_identify (Assembler, (const char*)  command_str); // each command has argument (it can be fictive (POISON))
-        int argument_int = argument_identify(Assembler,  count_of_arg, command_int, (const char*) argument_str);
+        int argument_int = argument_identify(Assembler, command_int, argument_str);
 
         Assembler -> byte_code_buf[ Assembler -> ind_counter ++ ] = command_int;
         Assembler -> byte_code_buf[ Assembler -> ind_counter ++ ] = argument_int;
@@ -155,19 +154,20 @@ int command_identify (asm_struct* Assembler, const char* command_str) {
     return UNKNOWN_COM;
 }
 
-int argument_identify (asm_struct* Assembler, int count_of_arg, int command_int, const char* argument_str) {
+int argument_identify (asm_struct* Assembler, int command_int, char* argument_str) {
     assert(argument_str);
 
-    switch (count_of_arg)
+    switch (Assembler -> cmd_info_arr[command_int].arg_count)
     {
-        case 1:  // one argument
+        case NO_ARGS:
+            *argument_str =  '\0';
             return POISON;   // each command has argument (it can be fictive (POISON))
             break;
 
-        case 2: // two arguments
+        case ONE_ARG:
 
-            if  (command_int >= CMD_PUSHR &&                                 // CMD_PUSHR = 33, CMD_POPR = 34, CMD_IN = 35
-                 command_int <= CMD_IN)
+            if  (command_int >= CMD_PUSHR &&                                 // CMD_PUSHR = 33, CMD_POPR = 34
+                 command_int <= CMD_POPR)
                 return register_num(argument_str);
 
             else if (command_int >= CMD_JMP &&                               // CMD_JMP = 64, CMD_JB  = 65, CMD_JBE = 66, CMD_JA   = 67
