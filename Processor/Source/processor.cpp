@@ -16,15 +16,24 @@
 
 CalcErr_t processor(ProcStruct* Proc_struct) { // each command has argument (it can be fictive (POISON))
     
+    int code_of_cmd = 0;
+
     while (Proc_struct -> bite_code.ind_counter  <  Proc_struct -> bite_code.size &&
            Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter]  !=  CMD_HLT) 
     {        
-        int code_of_cmd = Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter];
+        // printf("%d: %s (%d)     (RAX = %d)\n", Proc_struct ->bite_code.ind_counter, Proc_struct ->cmd_info_arr[Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter]].name, Proc_struct ->bite_code.buffer[Proc_struct->bite_code.ind_counter + 1], Proc_struct ->register_buf[0]);
+
+        // Proc_dump_stack_only(stdout, Proc_struct);
+
+        // for (size_t i = 0; i < 10; i++) 
+        //     printf("%d ", Proc_struct->return_stack.data[i]);
+        // printf("\n");
+
+        code_of_cmd = Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter];
         
         Proc_struct -> cmd_info_arr[code_of_cmd].cmd_func (Proc_struct);
-
-        Proc_struct -> bite_code.ind_counter += 2; // each command has argument (it can be fictive (POISON))
     }
+
     return SUCCESS;
 }
 
@@ -39,6 +48,8 @@ CalcErr_t Stack_Arif_##func_name (ProcStruct* Proc_struct) {                 \
     int result =  operand_2 operator operand_1;                              \
                                                                              \
     Stack_Push(&(Proc_struct -> calc_stack), result);                        \
+                                                                             \
+    Proc_struct -> bite_code.ind_counter += 2;                               \
                                                                              \
     return CALC_SUCCESS;                                                     \
 }
@@ -58,7 +69,9 @@ CalcErr_t Stack_Arif_Sqrt (ProcStruct* Proc_struct) {
     int result = sqrt( (double) operand);              
                                                                         
     Stack_Push(&(Proc_struct -> calc_stack), result);                   
-                                                                        
+                                                      
+    Proc_struct -> bite_code.ind_counter += 2; // each command has argument (it can be fictive (POISON))
+    
     return CALC_SUCCESS;                                                
 }
 
@@ -69,7 +82,11 @@ StackErr_t Stack_Push_Proc (ProcStruct* Proc_struct) {
     stack_t push_arg    = Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter + 1];
     stack_struct* stack = &(Proc_struct -> calc_stack);
 
-    return Stack_Push(stack, push_arg);
+    StackErr_t errors = Stack_Push(stack, push_arg);
+
+    Proc_struct -> bite_code.ind_counter += 2; // each command has argument (it can be fictive (POISON))
+
+    return errors;
 }
 
 StackErr_t Stack_Pop_Proc (ProcStruct* Proc_struct) {
@@ -77,7 +94,11 @@ StackErr_t Stack_Pop_Proc (ProcStruct* Proc_struct) {
 
     stack_struct* stack = &(Proc_struct -> calc_stack);
 
-    return Stack_Pop(stack);
+    StackErr_t errors = Stack_Pop(stack);
+
+    Proc_struct -> bite_code.ind_counter += 2; // each command has argument (it can be fictive (POISON))
+
+    return errors;
 }
 
 CalcErr_t Stack_PushR (ProcStruct* Proc_struct) {
@@ -89,7 +110,11 @@ CalcErr_t Stack_PushR (ProcStruct* Proc_struct) {
     stack_t       value =   Proc_struct -> register_buf[register_num];
     stack_struct* stack = &(Proc_struct -> calc_stack);
 
-    return Stack_Push(stack, value);
+    StackErr_t errors = Stack_Push(stack, value);
+
+    Proc_struct -> bite_code.ind_counter += 2; // each command has argument (it can be fictive (POISON))
+
+    return errors;
 }
 
 CalcErr_t Stack_PopR (ProcStruct* Proc_struct) {
@@ -102,6 +127,8 @@ CalcErr_t Stack_PopR (ProcStruct* Proc_struct) {
     stack_t       value = Stack_Pop(stack);
 
     Proc_struct -> register_buf[register_num] = value;
+
+    Proc_struct -> bite_code.ind_counter += 2; // each command has argument (it can be fictive (POISON))
 
     return SUCCESS;
 }
@@ -123,6 +150,8 @@ CalcErr_t Stack_In (ProcStruct* Proc_struct) {
 
     Stack_Push(stack, value);
 
+    Proc_struct -> bite_code.ind_counter += 2; // each command has argument (it can be fictive (POISON))
+
     return SUCCESS;
 }
 
@@ -132,8 +161,6 @@ CalcErr_t Jump_to_JMP (ProcStruct* Proc_struct) {
     size_t ind_to_jump = Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter + 1];
 
     Proc_struct -> bite_code.ind_counter = ind_to_jump;
-
-    Proc_struct -> bite_code.ind_counter -= 2;
 
     return SUCCESS;
 }
@@ -148,6 +175,9 @@ CalcErr_t Jump_##func_name (ProcStruct* Proc_struct) {                          
                                                                                             \
     if (num1 operator num2)                                                                 \
         Jump_to_JMP(Proc_struct);                                                           \
+                                                                                            \
+    else                                                                                    \
+        Proc_struct -> bite_code.ind_counter += 2;                                          \
                                                                                             \
     return SUCCESS;                                                                         \
 }
@@ -166,7 +196,7 @@ CalcErr_t Call_command (ProcStruct* Proc_struct) {
 
     int remember_ind = Proc_struct -> bite_code.ind_counter + 2;
     
-    stack_struct* stack = &(Proc_struct -> calc_stack);
+    stack_struct* stack = &(Proc_struct -> return_stack);
     
     Stack_Push(stack, remember_ind);
 
@@ -178,13 +208,11 @@ CalcErr_t Call_command (ProcStruct* Proc_struct) {
 CalcErr_t Return_to_call_RET (ProcStruct* Proc_struct) {
     assert(Proc_struct);
 
-    stack_struct* stack = &(Proc_struct -> calc_stack);
+    stack_struct* stack = &(Proc_struct -> return_stack);
 
     int ind_to_return = Stack_Pop(stack);
     
     Proc_struct -> bite_code.ind_counter = ind_to_return;
-
-    Proc_struct -> bite_code.ind_counter -= 2;    
 
     return SUCCESS;
 }
@@ -200,6 +228,8 @@ CalcErr_t Push_from_RAM_PUSHM(ProcStruct* Proc_struct) {
     int pushing_value   =   Proc_struct -> RAM_buf[RAM_ind];
 
     Stack_Push(stack, pushing_value);
+
+    Proc_struct -> bite_code.ind_counter += 2; // each command has argument (it can be fictive (POISON))
 
     return SUCCESS;
 }
@@ -217,6 +247,8 @@ CalcErr_t Pop_to_RAM_POPM(ProcStruct* Proc_struct) {
 
     Proc_struct -> RAM_buf[RAM_ind] = popping_value;
 
+    Proc_struct -> bite_code.ind_counter += 2; // each command has argument (it can be fictive (POISON))
+
     return SUCCESS;
 }
 
@@ -232,6 +264,8 @@ CalcErr_t Proc_Dtor (ProcStruct* Proc_struct) {
     free(Proc_struct -> cmd_info_arr);
     
     memset(Proc_struct, POISON, size_of_struct);
+
+    Proc_struct -> bite_code.ind_counter += 2; // each command has argument (it can be fictive (POISON))
 
     return DESTROY_SUC;
 }
@@ -416,23 +450,4 @@ CalcErr_t Proc_dump_stack_only (FILE* output_file, ProcStruct* Proc_struct) {
         fprintf(output_file, "\n\n");
 
     return DUMP_SUCCESS;
-}
-
-
-CmdStruct* find_cmd_in_arr(ProcStruct* Proc_struct, int code_of_cmd) {
-    assert(Proc_struct);
-
-    int el_num = 0;
-
-    while (el_num < MAX_COUNT_OF_CMD &&
-           Proc_struct -> cmd_info_arr[el_num].code != 0)
-    {
-        if (Proc_struct -> cmd_info_arr[el_num].code == code_of_cmd)
-            return &(Proc_struct -> cmd_info_arr[el_num]);
-
-        ++el_num;
-    }
-    
-    fprintf(stderr, "find_cmd_in_arr: can`t find this command (%d) in cmd_info_array (ind = %ld)\n", code_of_cmd, Proc_struct -> bite_code.ind_counter);
-    return NULL;
 }

@@ -3,14 +3,14 @@ POPR RAX
 CALL :1
 MUL
 HLT
-1:
-PUSHR RAX
-PUSHR RAX
-PUSH 1
-JE :2
-SUB
-POPR RAX
-CALL :1
-2:
-MUL
-RET
+    1:
+    PUSHR RAX
+    PUSHR RAX
+    PUSH 1
+    JE :2
+    SUB
+    POPR RAX
+    CALL :1
+        2:
+        MUL
+        RET

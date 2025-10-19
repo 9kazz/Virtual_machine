@@ -41,5 +41,4 @@ CalcErr_t Jump_Above_Equal_JAE (ProcStruct* Proc_struct);
 CalcErr_t Jump_Equal_JE        (ProcStruct* Proc_struct);
 CalcErr_t Jump_Not_Equal_JNE   (ProcStruct* Proc_struct);
 
-CmdStruct* find_cmd_in_arr(ProcStruct* Proc_struct, int code_of_cmd);
 #endif

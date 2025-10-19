@@ -32,4 +32,4 @@ $(TARGET): $(OBJECTS)
 
 
 clean:
-	del -f *.o $(TARGET)
+	rm -f *.o
