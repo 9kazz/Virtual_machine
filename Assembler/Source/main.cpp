@@ -19,14 +19,11 @@ int main(int argc, char* argv[]) {
     assert(input_file);
     assert(output_file);
 
-    asm_struct Assembler;
-        Assembler.count_of_commands = 0;
-        Assembler.byte_code_buf     = NULL;
-        Assembler.ind_counter       = 0;
+    ASM_STRUCT_INIT(Assembler)
 
-    char** pointers_array = create_pointers_array(input_file, &(Assembler.count_of_commands));
+    create_pointers_array(input_file, &Assembler);
 
-    Assembler.byte_code_buf = assembler (pointers_array, &Assembler);
+    assembler (&Assembler);
     
     fprint_byte_code(output_file, Assembler);
 
@@ -36,10 +33,10 @@ int main(int argc, char* argv[]) {
     //     fprintf(stdout, "%d\t", label_array[el_num]);
     // }
 
-    free(pointers_array);
-
     fclose(input_file);
     fclose(output_file);
+
+    Assembler_struct_Dtor(&Assembler);
 
     fprintf(stdout, "END WITH SUCCESS");
 

@@ -8,7 +8,8 @@ enum function_status {
     END_SUCCESS = 1,
     UNKNOWN_COM = -1,
     NOT_LABEL   = -2,
-    IS_LABEL    =  2
+    IS_LABEL    =  2,
+    DESTROY_SUC = 666
 };
 
 enum commands {
@@ -41,17 +42,25 @@ const int COMMAND_MAX_LEN  = 32;
 const int COUNT_OF_REG     =  8;
 const int LABEL_BUF_SIZE   = 10;
 
-int*   assembler          (char**      pointers_array, asm_struct* Assembler);
-size_t fill_byte_code_buf (char**      pointers_array, asm_struct* Assembler, int*    byte_code_pointer, int* label_array);
+int    assembler          (asm_struct* Assembler);
+size_t fill_byte_code_buf (asm_struct* Assembler);
 int    command_identify   (const char* command_str);
-int    argument_identify  (int         count_of_arg,   int command_int,       const char* argument_str,  int* label_array);
+int    argument_identify  (asm_struct* Assembler, int count_of_arg, int command_int,  const char* argument_str);
 
 int    register_num       (const char* argument_str);
 
-int    fill_label_array   (char*       command_str,  size_t* count_of_commands_without_labeles, asm_struct Assembler, int* label_array);
-int    identify_label     (const char* argument_str, int*    label_array);
+int    fill_label_array   (asm_struct* Assembler, char*       command_str,  size_t* count_of_commands_without_labeles);
+int    identify_label     (asm_struct* Assembler, const char* argument_str);
 int    is_label           (char*       string);
 
 int    indentify_register_RAM (char* argument_str);
+
+#define ASM_STRUCT_INIT(name)                                \
+    asm_struct name;                                         \
+        name.byte_code_buf     = NULL;                       \
+        name.asm_code_buf      = NULL;                       \
+        name.pointers_array    = NULL;                       \
+        name.count_of_commands = 0;                          \
+        name.ind_counter       = 0; 
 
 #endif

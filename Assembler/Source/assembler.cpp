@@ -9,37 +9,36 @@
 #include "assembler.h"
 #include "utils.h"
 
-int* assembler (char** pointers_array, asm_struct* Assembler) {
-    assert(pointers_array);
+int assembler (asm_struct* Assembler) {
     assert(Assembler);
 
     size_t byte_code_capacity = 2 * (Assembler -> count_of_commands); // each command has argument (it can be fictive (POISON))
 
-    SAFE_CALLOC(byte_code_pointer, byte_code_capacity, int)
+    SAFE_CALLOC(temp_byte_code_pointer, byte_code_capacity, int)
+    Assembler -> byte_code_buf = temp_byte_code_pointer;
 
-    SAFE_CALLOC(label_array, LABEL_BUF_SIZE, int)
+    SAFE_CALLOC(temp_label_array, LABEL_BUF_SIZE, int)
+    Assembler -> labeles_array = temp_label_array;
 
-    size_t count_of_commands_without_labels = fill_byte_code_buf (pointers_array, Assembler, byte_code_pointer, label_array); // 1st compilation
+    size_t count_of_commands_without_labels = fill_byte_code_buf (Assembler); // 1st compilation
     Assembler -> ind_counter = 0;
 
-    listing_labeles_array(stdout, label_array);
+    listing_labeles_array(stdout, Assembler);
     
-    fill_byte_code_buf (pointers_array, Assembler, byte_code_pointer, label_array); // 2nd compilation with lables
+    fill_byte_code_buf (Assembler); // 2nd compilation with lables
     
-    free(label_array);
-
     if (count_of_commands_without_labels == 0) {
         fprintf(stderr, "fill_byte_code_buf: error");
-        return byte_code_pointer;
+        return END_SUCCESS;
     }
-
+    
     Assembler -> count_of_commands = count_of_commands_without_labels;
 
-    return byte_code_pointer;
+    return END_SUCCESS;
 }
 
-size_t fill_byte_code_buf (char** pointers_array, asm_struct* Assembler, int* byte_code_pointer, int* label_array) {
-    assert(pointers_array);
+size_t fill_byte_code_buf (asm_struct* Assembler) {
+    assert(Assembler);
 
     char command_str [COMMAND_MAX_LEN] = {0}; 
     char argument_str[COMMAND_MAX_LEN] = {0};
@@ -50,9 +49,9 @@ size_t fill_byte_code_buf (char** pointers_array, asm_struct* Assembler, int* by
     size_t count_of_commands_without_labeles = Assembler -> count_of_commands;
 
     while (cmd_num < Assembler -> count_of_commands && 
-           pointers_array[cmd_num] != NULL) 
+           Assembler -> pointers_array[cmd_num] != NULL) 
     {
-        count_of_arg = sscanf( (const char*) pointers_array[cmd_num], "%32s %32s", command_str, argument_str); // COMMAND_MAX_LEN = 32
+        count_of_arg = sscanf( (const char*) Assembler -> pointers_array[cmd_num], "%31s %31s", command_str, argument_str); // COMMAND_MAX_LEN = 32
 
         if (count_of_arg == 0) {                            // TODO: new func
             fprintf(stderr, "Incorrect ASM-code");
@@ -62,17 +61,17 @@ size_t fill_byte_code_buf (char** pointers_array, asm_struct* Assembler, int* by
             *argument_str = '\0';
         }
 
-        int label_check = fill_label_array(command_str, &count_of_commands_without_labeles, *Assembler, label_array);
+        int label_check = fill_label_array(Assembler, command_str, &count_of_commands_without_labeles);
         if (label_check == IS_LABEL) {
             ++cmd_num;      
             continue;
         }
 
         int  command_int = command_identify( (const char*) command_str); // each command has argument (it can be fictive (POISON))
-        int argument_int = argument_identify(count_of_arg, command_int, (const char*) argument_str, label_array);
+        int argument_int = argument_identify(Assembler, count_of_arg, command_int, (const char*) argument_str);
 
-        byte_code_pointer[ Assembler -> ind_counter ++ ] = command_int;
-        byte_code_pointer[ Assembler -> ind_counter ++ ] = argument_int;
+        Assembler -> byte_code_buf[ Assembler -> ind_counter ++ ] = command_int;
+        Assembler -> byte_code_buf[ Assembler -> ind_counter ++ ] = argument_int;
 
         listing_byte_code(stdout,     *Assembler,
                           command_str, argument_str,
@@ -128,7 +127,7 @@ int command_identify (const char* command_str) {
         return UNKNOWN_COM;
 }
 
-int argument_identify (int count_of_arg, int command_int, const char* argument_str, int* label_array) {
+int argument_identify (asm_struct* Assembler, int count_of_arg, int command_int, const char* argument_str) {
     assert(argument_str);
 
     switch (count_of_arg)
@@ -145,7 +144,7 @@ int argument_identify (int count_of_arg, int command_int, const char* argument_s
 
             else if (command_int >= CMD_JMP &&                               // CMD_JMP = 64, CMD_JB  = 65, CMD_JBE = 66, CMD_JA   = 67
                      command_int <= CMD_CALL)                                // CMD_JAE = 68, CMD_JE  = 69, CMD_JNE = 70, CMD_CALL = 71
-                return identify_label(argument_str, label_array);
+                return identify_label(Assembler, argument_str);
 
             else if (command_int >= CMD_PUSHM &&                             // CMD_PUSHM = 73, CMD_POPM = 74
                      command_int <= CMD_POPM)
@@ -179,16 +178,16 @@ int register_num (const char* argument_str) {
     return offset_from_first_reg;
 }
 
-int fill_label_array (char* command_str, size_t* count_of_commands_without_labeles, asm_struct Assembler, int* label_array) {
+int fill_label_array (asm_struct* Assembler, char* command_str, size_t* count_of_commands_without_labeles) {
     assert(command_str);
     assert(count_of_commands_without_labeles);
-    assert(label_array);
+    assert(Assembler);
 
     if (is_label(command_str)) {
 
         int label = *command_str - '0';
 
-        label_array[label] = Assembler.ind_counter;
+        Assembler -> labeles_array[label] = Assembler -> ind_counter;
 
         --(*count_of_commands_without_labeles);
               
@@ -198,8 +197,9 @@ int fill_label_array (char* command_str, size_t* count_of_commands_without_label
     return NOT_LABEL;
 }
 
-int identify_label (const char* argument_str, int* label_array) {
+int identify_label (asm_struct* Assembler, const char* argument_str) {
     assert(argument_str);
+    assert(Assembler);
 
     int argument_int    = 0;
 
@@ -214,7 +214,7 @@ int identify_label (const char* argument_str, int* label_array) {
             return NOT_LABEL;
         }
 
-        argument_int = label_array[label_number];
+        argument_int = Assembler -> labeles_array[label_number];
     }
 
     else
@@ -240,11 +240,11 @@ int indentify_register_RAM(char* argument_str) {
     static int len = strlen ("[AX]");
 
     if (argument_str[0] == '[' &&
-        argument_str[4] == ']') 
+        argument_str[len] == ']') 
     {
-        argument_str[4] = '\0';
+        argument_str[len] = '\0';
         Register = register_num(argument_str + 1);
-        argument_str[4] = ']';
+        argument_str[len] = ']';
     }
 
     else 
