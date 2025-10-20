@@ -1,19 +1,19 @@
 IN
 POPR RAX
-CALL :1
+CALL :abc
 MUL
 
 
 
 HLT
-    1:
+    abc:
     PUSHR RAX
     PUSHR RAX
     PUSH 1
     JE :2
     SUB
     POPR RAX
-    CALL :1
+    CALL :abc
         2:
         MUL
         RET

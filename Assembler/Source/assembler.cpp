@@ -17,7 +17,7 @@ int assembler (asm_struct* Assembler) {
     SAFE_CALLOC(temp_byte_code_pointer, byte_code_capacity, int)
     Assembler -> byte_code_buf = temp_byte_code_pointer;
 
-    SAFE_CALLOC(temp_label_array, LABEL_BUF_SIZE, int)
+    SAFE_CALLOC(temp_label_array, LABEL_BUF_SIZE, LabelStruct)
     Assembler -> labels_array = temp_label_array;
 
     size_t count_of_commands_without_labels = fill_byte_code_buf (Assembler); // 1st compilation
@@ -25,7 +25,7 @@ int assembler (asm_struct* Assembler) {
 
     listing_labels_array(stdout, Assembler);
     
-    fill_byte_code_buf (Assembler); // 2nd compilation with lables
+    fill_byte_code_buf (Assembler); // 2nd compilation with labels
     
     if (count_of_commands_without_labels == 0) {
         fprintf(stderr, "fill_byte_code_buf: error");
@@ -211,12 +211,29 @@ int fill_label_array (asm_struct* Assembler, char* command_str, size_t* count_of
     assert(count_of_commands_without_labels);
     assert(Assembler);
 
-    if (is_label(command_str)) {
+    if (is_label(command_str) == IS_LABEL) {
 
-        int label = *command_str - '0';
+        int hash = 0;
+        
+        size_t offset_to_last_el = strlen(command_str) - 1;
 
-        Assembler -> labels_array[label] = Assembler -> ind_counter;
+        *(command_str + offset_to_last_el) = '\0';
 
+        if (Assembler -> label_ind_counter >= LABEL_BUF_SIZE) {
+            printf("fill_label_array: labels buffer is overflow\n");
+            return NOT_LABEL;
+        }
+
+        Assembler -> labels_array[Assembler->label_ind_counter].name = strdup(command_str);
+    
+        for (size_t char_num = 0; command_str[char_num] != '\0' ; char_num++)
+            hash = (hash * PRIME_COEF_HASH + Assembler->labels_array[Assembler->label_ind_counter].name[char_num]) % MAX_INT_VALUE; 
+        
+        Assembler -> labels_array[Assembler->label_ind_counter].hash  = hash;
+
+        Assembler -> labels_array[Assembler->label_ind_counter].index = Assembler -> ind_counter;
+
+        (Assembler -> label_ind_counter)++ ;
         --(*count_of_commands_without_labels);
               
         return IS_LABEL;
@@ -225,24 +242,28 @@ int fill_label_array (asm_struct* Assembler, char* command_str, size_t* count_of
     return NOT_LABEL;
 }
 
-int identify_label (asm_struct* Assembler, const char* argument_str) {
+int identify_label (asm_struct* Assembler, char* argument_str) {
     assert(argument_str);
     assert(Assembler);
 
-    int argument_int    = 0;
+    int argument_int = 0;
+    int finding_hash = 0;
 
     if (*argument_str == ':') 
     {
-        int label_number = atoi(argument_str + 1);
+        ++argument_str;
 
-        if (label_number < 0 ||
-            label_number > LABEL_BUF_SIZE - 1) 
-        {
-            fprintf(stderr, "Incorrect label");
-            return NOT_LABEL;
+        for (size_t char_num = 0; argument_str[char_num] != '\0'; char_num++)
+            finding_hash = (finding_hash * PRIME_COEF_HASH + argument_str[char_num]) % MAX_INT_VALUE;  
+
+        for (size_t label_arr_el = 0; label_arr_el < LABEL_BUF_SIZE; label_arr_el++) {
+
+            if (Assembler -> labels_array[label_arr_el].hash == finding_hash)
+                argument_int = Assembler -> labels_array[label_arr_el].index;
+
+            else
+                continue;
         }
-
-        argument_int = Assembler -> labels_array[label_number];
     }
 
     else
@@ -254,10 +275,12 @@ int identify_label (asm_struct* Assembler, const char* argument_str) {
 int is_label(char* string) {
     assert(string);
 
-    if ( *(string + 1) == ':')
-        return 1;
+    size_t offset_to_last_el = strlen(string) - 1;
 
-    return 0;
+    if ( *(string + offset_to_last_el) == ':')
+        return IS_LABEL;
+
+    return NOT_LABEL;
 }
 
 int identify_register_RAM(char* argument_str) {

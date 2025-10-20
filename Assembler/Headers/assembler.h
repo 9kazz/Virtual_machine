@@ -4,10 +4,6 @@
 #include <stdio.h>
 #include "utils.h"
 
-const int MAX_COUNT_OF_CMD = 128;
-const int PRIME_COEF_HASH  = 43;
-const int MAX_INT_VALUE    = ~(1 << 31);
-
 enum count_of_cmd_args {
     NO_ARGS = 0,
     ONE_ARG = 1
@@ -16,8 +12,8 @@ enum count_of_cmd_args {
 enum function_status {
     END_SUCCESS = 1,
     UNKNOWN_COM = -1,
-    NOT_LABEL   = -2,
-    IS_LABEL    =  2,
+    NOT_LABEL   =  0,
+    IS_LABEL    =  1,
     DESTROY_SUC = 666
 };
 
@@ -49,11 +45,15 @@ enum commands {
 const int POISON           = 0xDEADFACE;
 const int COMMAND_MAX_LEN  = 32;
 const int COUNT_OF_REG     =  8;
-const int LABEL_BUF_SIZE   = 10;
+const int LABEL_BUF_SIZE   = 16;
+
+const int MAX_COUNT_OF_CMD = 128;
+const int PRIME_COEF_HASH  = 43;
+const int MAX_INT_VALUE    = ~(1 << 31);
 
 int assembler          (asm_struct* Assembler);
 
-CmdStruct* create_cmd_info_arr(void);
+CmdStruct*   create_cmd_info_arr(void);
 
 size_t fill_byte_code_buf (asm_struct* Assembler);
 int    command_identify   (asm_struct* Assembler, const char* command_str);
@@ -61,8 +61,8 @@ int    argument_identify  (asm_struct* Assembler, int command_int, char* argumen
 
 int    register_num       (const char* argument_str);
 
-int    fill_label_array   (asm_struct* Assembler, char*       command_str,  size_t* count_of_commands_without_labels);
-int    identify_label     (asm_struct* Assembler, const char* argument_str);
+int    fill_label_array   (asm_struct* Assembler, char* command_str,  size_t* count_of_commands_without_labels);
+int    identify_label     (asm_struct* Assembler, char* argument_str);
 int    is_label           (char*       string);
 
 int    identify_register_RAM (char* argument_str);
@@ -74,6 +74,8 @@ int    identify_register_RAM (char* argument_str);
         name.pointers_array    = NULL;                       \
         name.count_of_commands = 0;                          \
         name.ind_counter       = 0;                          \
-        name.cmd_info_arr      = create_cmd_info_arr();
+        name.cmd_info_arr      = create_cmd_info_arr();      \
+        name.labels_array      = NULL;                       \
+        name.label_ind_counter = 0;
 
 #endif

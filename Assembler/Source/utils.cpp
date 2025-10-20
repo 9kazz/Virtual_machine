@@ -94,6 +94,7 @@ int fill_point_ar (asm_struct* Assembler) {
 
         if (*start_of_str == '\r') {
             start_of_str = strchr(start_of_str, '\0') + 1;
+            (Assembler -> count_of_commands)-- ;
             continue;
         }
         
@@ -141,13 +142,24 @@ void listing_labels_array (FILE* listing_file, asm_struct* Assembler) {
 
     fprintf(listing_file, "\n-------------------------------------------------------------------------------\n");
 
-    for (int el_num = 0; el_num < LABEL_BUF_SIZE; el_num++)
-        fprintf(listing_file, "[%d]\t", el_num);
+    fprintf(listing_file, "  Index of label\t" "Label name\t" "Index in byte-code\t" "    " "Hash\n\n");
+    for (int el_num = 0; el_num < LABEL_BUF_SIZE; el_num++) {
+        
+        if (el_num < Assembler -> label_ind_counter) 
+        {
+            fprintf(listing_file, "\t\b*[%2d]\t", el_num);
+            fprintf(listing_file, "%16s:\t", Assembler -> labels_array[el_num].name);
+        } 
+        
+        else 
+        {
+            fprintf(listing_file, "\t[%2d]\t", el_num);
+            fprintf(listing_file, "%16s:\t", Assembler -> labels_array[el_num].name); 
+        }
 
-    fprintf(listing_file, "\n\n");
-
-    for (int el_num = 0; el_num < LABEL_BUF_SIZE; el_num++)
-        fprintf(listing_file, "[%d]\t", Assembler -> labels_array[el_num]);
+        fprintf(listing_file, "%8d\t",       Assembler -> labels_array[el_num].index);
+        fprintf(listing_file, "%16d\n",      Assembler -> labels_array[el_num].hash);
+    }     
 
     fprintf(listing_file, "\n-------------------------------------------------------------------------------\n\n");
 }   
@@ -196,8 +208,12 @@ int Assembler_struct_Dtor (asm_struct* Assembler) {
     free(Assembler -> asm_code_buf);
     free(Assembler -> byte_code_buf);
     free(Assembler -> pointers_array);
-    free(Assembler -> labels_array);
     free(Assembler -> cmd_info_arr);
+
+    for (size_t labels_arr_el = 0; labels_arr_el < Assembler -> label_ind_counter; labels_arr_el++)
+        free(Assembler -> labels_array[labels_arr_el].name);
+
+    free(Assembler -> labels_array);
 
     return DESTROY_SUC;
 }

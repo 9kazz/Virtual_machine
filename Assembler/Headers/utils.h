@@ -5,6 +5,7 @@
 
 struct asm_struct;
 struct CmdStruct;
+struct LabelStruct;
 
 struct CmdStruct {
     const char* name;
@@ -13,14 +14,21 @@ struct CmdStruct {
     size_t      arg_count;
 };
 
+struct LabelStruct {
+    char* name;
+    int   hash;
+    int   index;
+};
+
 struct asm_struct {
-    char*  asm_code_buf;
-    char** pointers_array;
-    int*   byte_code_buf;
-    int*   labels_array;
-    size_t count_of_commands;
-    size_t ind_counter;
-    CmdStruct* cmd_info_arr;
+    char*        asm_code_buf;
+    char**       pointers_array;
+    int*         byte_code_buf;
+    LabelStruct* labels_array;
+    size_t       label_ind_counter;
+    size_t       count_of_commands;
+    size_t       ind_counter;
+    CmdStruct*   cmd_info_arr;
 };
 
 int    create_pointers_array (FILE* file_input,     asm_struct* Assembler);
