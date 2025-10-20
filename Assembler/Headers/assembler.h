@@ -5,7 +5,8 @@
 #include "utils.h"
 
 const int MAX_COUNT_OF_CMD = 128;
-const int PRIME_COEF_HASH  = 257;
+const int PRIME_COEF_HASH  = 43;
+const int MAX_INT_VALUE    = ~(1 << 31);
 
 enum count_of_cmd_args {
     NO_ARGS = 0,

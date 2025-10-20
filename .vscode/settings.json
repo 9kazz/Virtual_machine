@@ -1,5 +1,8 @@
 {
     "files.associations": {
         "typeinfo": "cpp"
-    }
+    },
+    "cSpell.words": [
+        "POPR"
+    ]
 }

@@ -23,6 +23,9 @@ int create_pointers_array (FILE* file_input, asm_struct* Assembler) {
     Assembler -> pointers_array = (char**) calloc(Assembler -> count_of_commands + 1, sizeof(Assembler -> asm_code_buf));
 
     fill_point_ar(Assembler);
+
+    // for (size_t i = 0; i < Assembler -> count_of_commands; i++)
+    //     printf("%d: %s\n", i, Assembler -> pointers_array[i]);
     
     return END_SUCCESS;
 }
@@ -45,10 +48,14 @@ size_t size_of_file (FILE* file_input) {
 char* fill_buffer (asm_struct* Assembler, FILE* file_input, size_t fsize) {
     assert(file_input);
 
-    size_t new_size_buffer = fread (Assembler -> asm_code_buf, 1, fsize, file_input) + 1;
+    size_t new_size_buffer = fread (Assembler -> asm_code_buf, 1, fsize, file_input) + 2; // 2 last elements are '\0' and EOF. It`s necessary to detect end of buffer 
 
     Assembler -> asm_code_buf = (char*) realloc(Assembler -> asm_code_buf, new_size_buffer);
-    Assembler -> asm_code_buf [new_size_buffer - 1] = '\0';
+    Assembler -> asm_code_buf [new_size_buffer - 2] = '\0';
+    Assembler -> asm_code_buf [new_size_buffer - 1] = EOF;
+
+    for (size_t i = 0; i < new_size_buffer; i++)
+        printf("%d ", Assembler->asm_code_buf[i]);
 
     return Assembler -> asm_code_buf; 
 }
@@ -79,7 +86,19 @@ int fill_point_ar (asm_struct* Assembler) {
     while (i < Assembler -> count_of_commands && 
            start_of_str != NULL) 
     {
-        *(Assembler -> pointers_array + (i++)) = start_of_str; 
+
+        *(Assembler -> pointers_array + i) = start_of_str; 
+        
+        if (*start_of_str == EOF)
+            break;
+
+        if (*start_of_str == '\r') {
+            start_of_str = strchr(start_of_str, '\0') + 1;
+            continue;
+        }
+        
+        ++i;
+
         start_of_str = strchr(start_of_str, '\0') + 1;
     }
 
@@ -91,7 +110,7 @@ int fill_point_ar (asm_struct* Assembler) {
 
 void fprint_byte_code (FILE* output_file, asm_struct Assembler) {
     
-    size_t byte_code_size = 2 * Assembler.count_of_commands; // each command has argument (it can be fictive (POISON))
+    size_t byte_code_size = 2 * Assembler.count_of_commands; // each command has argument (it can be fake (POISON))
 
     size_t el_num = 0;
 
@@ -112,7 +131,7 @@ void listing_byte_code (FILE* listing_file, asm_struct Assembler,
     fprintf(listing_file, "%8s %8s \t",       command_str,                  argument_str);
 
     if (argument_int == POISON)
-        fprintf(listing_file, "%8d %8s\n", command_int, "POISON"); // each command has argument (it can be fictive (POISON))
+        fprintf(listing_file, "%8d %8s\n", command_int, "POISON"); // each command has argument (it can be fake (POISON))
 
     else                    
         fprintf(listing_file, "%8d %8d\n", command_int,  argument_int);
@@ -166,7 +185,7 @@ void command_line_flags(int argc, char* argv[], FILE** input_file, FILE** output
                 break;
 
             default:
-                fprintf(stderr, "command_line_flags: unexpectid error\n");
+                fprintf(stderr, "command_line_flags: unexpected error\n");
         }
     }
 }

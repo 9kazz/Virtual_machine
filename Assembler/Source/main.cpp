@@ -21,6 +21,9 @@ int main(int argc, char* argv[]) {
 
     ASM_STRUCT_INIT(Assembler)
 
+    // for (int i = 0; i < MAX_COUNT_OF_CMD; i++)
+    //     printf("%s: %d\n", Assembler.cmd_info_arr[i].name, Assembler.cmd_info_arr[i].hash);
+
     create_pointers_array(input_file, &Assembler);
 
     assembler (&Assembler);

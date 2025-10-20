@@ -2,6 +2,9 @@ IN
 POPR RAX
 CALL :1
 MUL
+
+
+
 HLT
     1:
     PUSHR RAX

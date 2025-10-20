@@ -12,7 +12,7 @@
 int assembler (asm_struct* Assembler) {
     assert(Assembler);
 
-    size_t byte_code_capacity = 2 * (Assembler -> count_of_commands); // each command has argument (it can be fictive (POISON))
+    size_t byte_code_capacity = 2 * (Assembler -> count_of_commands); // each command has argument (it can be fake (POISON))
 
     SAFE_CALLOC(temp_byte_code_pointer, byte_code_capacity, int)
     Assembler -> byte_code_buf = temp_byte_code_pointer;
@@ -38,22 +38,22 @@ int assembler (asm_struct* Assembler) {
 }
 
 
-#define ONE_CMD_INFO(cmd_name, count_of_args)                                                    \
-                                                                                                 \
-CmdStruct cmd_##cmd_name {};                                                                     \
-    cmd_##cmd_name.name     = #cmd_name;                                                         \
-    cmd_##cmd_name.code     = CMD_##cmd_name;                                                    \
-                                                                                                 \
-    const char* str_##cmd_name = #cmd_name;                                                      \
-    int hash_##cmd_name = 0;                                                                     \
-                                                                                                 \
-    for (size_t char_num = 0; str_##cmd_name[char_num] != '\0'; char_num++)                      \
-        hash_##cmd_name = hash_##cmd_name * PRIME_COEF_HASH + str_##cmd_name[char_num];          \
-                                                                                                 \
-    cmd_##cmd_name.hash = hash_##cmd_name;                                                       \
-                                                                                                 \
-    cmd_##cmd_name.arg_count = count_of_args;                                                    \
-                                                                                                 \
+#define ONE_CMD_INFO(cmd_name, count_of_args)                                                                       \
+                                                                                                                    \
+CmdStruct cmd_##cmd_name {};                                                                                        \
+    cmd_##cmd_name.name     = #cmd_name;                                                                            \
+    cmd_##cmd_name.code     = CMD_##cmd_name;                                                                       \
+                                                                                                                    \
+    const char* str_##cmd_name = #cmd_name;                                                                         \
+    int hash_##cmd_name = 0;                                                                                        \
+                                                                                                                    \
+    for (size_t char_num = 0; str_##cmd_name[char_num] != '\0'; char_num++)                                         \
+        hash_##cmd_name = (hash_##cmd_name * PRIME_COEF_HASH + str_##cmd_name[char_num]) % MAX_INT_VALUE;           \
+                                                                                                                    \
+    cmd_##cmd_name.hash = hash_##cmd_name;                                                                          \
+                                                                                                                    \
+    cmd_##cmd_name.arg_count = count_of_args;                                                                       \
+                                                                                                                    \
     cmd_info_arr[CMD_##cmd_name] = cmd_##cmd_name;
 
 
@@ -105,7 +105,7 @@ size_t fill_byte_code_buf (asm_struct* Assembler) {
     {
         sscanf_check = sscanf( (const char*) Assembler -> pointers_array[cmd_num], "%31s %31s", command_str, argument_str); // COMMAND_MAX_LEN = 32
 
-        if (sscanf_check == 0) {                            // TODO: new func
+        if (sscanf_check == 0) {                           
             fprintf(stderr, "Incorrect ASM-code");
             return 0;
         }
@@ -140,7 +140,7 @@ int command_identify (asm_struct* Assembler, const char* command_str) {
     int finding_hash = 0;                                                         
 
     for (size_t char_num = 0; command_str[char_num] != '\0'; char_num++)
-        finding_hash = finding_hash * PRIME_COEF_HASH + command_str[char_num]; 
+        finding_hash = (finding_hash * PRIME_COEF_HASH + command_str[char_num]) % MAX_INT_VALUE; 
 
     for (size_t cmd_info_el = 0; cmd_info_el < MAX_COUNT_OF_CMD; cmd_info_el++) {
 
