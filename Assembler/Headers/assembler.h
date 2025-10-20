@@ -5,8 +5,8 @@
 #include "utils.h"
 
 enum count_of_cmd_args {
-    NO_ARGS = 0,
-    ONE_ARG = 1
+    FAKE_ARG = 0,
+    TRUE_ARG = 1
 };
 
 enum function_status {

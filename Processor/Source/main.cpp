@@ -13,8 +13,11 @@
 #include "stack_utils.h"
 #include "stack.h"
 
-
 FILE* LogFile = fopen("errors.log", "w");
+
+void log_file_close(void) {
+    fclose(LogFile);
+}
 
 int main(int argc, char* argv[]) {
 
@@ -50,9 +53,10 @@ int main(int argc, char* argv[]) {
 
     fclose(input_file);
     // fclose(draw_file);
-    fclose(LogFile);
 
     fprintf(stdout, "END WITH SUCCESS");
+
+    atexit(log_file_close);
 
     return 0;
 }

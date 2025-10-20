@@ -159,12 +159,12 @@ int argument_identify (asm_struct* Assembler, int command_int, char* argument_st
 
     switch (Assembler -> cmd_info_arr[command_int].arg_count)
     {
-        case NO_ARGS:
+        case FAKE_ARG:
             *argument_str =  '\0';
             return POISON;   // each command has argument (it can be fictive (POISON))
             break;
 
-        case ONE_ARG:
+        case TRUE_ARG:
 
             if  (command_int >= CMD_PUSHR &&                                 // CMD_PUSHR = 33, CMD_POPR = 34
                  command_int <= CMD_POPR)
