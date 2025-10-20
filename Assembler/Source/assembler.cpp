@@ -176,7 +176,7 @@ int argument_identify (asm_struct* Assembler, int command_int, char* argument_st
 
             else if (command_int >= CMD_PUSHM &&                             // CMD_PUSHM = 73, CMD_POPM = 74
                      command_int <= CMD_POPM)
-                return indentify_register_RAM( (char*) argument_str);
+                return identify_register_RAM( (char*) argument_str);
 
             else
                 return atoi(argument_str);
@@ -260,7 +260,7 @@ int is_label(char* string) {
     return 0;
 }
 
-int indentify_register_RAM(char* argument_str) {
+int identify_register_RAM(char* argument_str) {
     assert(argument_str);
 
     int Register = -1;
@@ -276,7 +276,7 @@ int indentify_register_RAM(char* argument_str) {
     }
 
     else 
-        fprintf(stderr, "Incorrect syntacsis of RAM commans");
+        fprintf(stderr, "Incorrect syntax of RAM commans");
 
     return Register;
 }

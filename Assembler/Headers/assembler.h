@@ -65,7 +65,7 @@ int    fill_label_array   (asm_struct* Assembler, char*       command_str,  size
 int    identify_label     (asm_struct* Assembler, const char* argument_str);
 int    is_label           (char*       string);
 
-int    indentify_register_RAM (char* argument_str);
+int    identify_register_RAM (char* argument_str);
 
 #define ASM_STRUCT_INIT(name)                                \
     asm_struct name;                                         \
