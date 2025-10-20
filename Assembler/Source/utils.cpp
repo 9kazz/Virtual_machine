@@ -137,7 +137,7 @@ void listing_byte_code (FILE* listing_file, asm_struct Assembler,
         fprintf(listing_file, "%8d %8d\n", command_int,  argument_int);
 }
 
-void listing_labeles_array (FILE* listing_file, asm_struct* Assembler) {
+void listing_labels_array (FILE* listing_file, asm_struct* Assembler) {
 
     fprintf(listing_file, "\n-------------------------------------------------------------------------------\n");
 
@@ -147,7 +147,7 @@ void listing_labeles_array (FILE* listing_file, asm_struct* Assembler) {
     fprintf(listing_file, "\n\n");
 
     for (int el_num = 0; el_num < LABEL_BUF_SIZE; el_num++)
-        fprintf(listing_file, "[%d]\t", Assembler -> labeles_array[el_num]);
+        fprintf(listing_file, "[%d]\t", Assembler -> labels_array[el_num]);
 
     fprintf(listing_file, "\n-------------------------------------------------------------------------------\n\n");
 }   
@@ -196,7 +196,7 @@ int Assembler_struct_Dtor (asm_struct* Assembler) {
     free(Assembler -> asm_code_buf);
     free(Assembler -> byte_code_buf);
     free(Assembler -> pointers_array);
-    free(Assembler -> labeles_array);
+    free(Assembler -> labels_array);
     free(Assembler -> cmd_info_arr);
 
     return DESTROY_SUC;

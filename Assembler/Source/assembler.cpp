@@ -18,12 +18,12 @@ int assembler (asm_struct* Assembler) {
     Assembler -> byte_code_buf = temp_byte_code_pointer;
 
     SAFE_CALLOC(temp_label_array, LABEL_BUF_SIZE, int)
-    Assembler -> labeles_array = temp_label_array;
+    Assembler -> labels_array = temp_label_array;
 
     size_t count_of_commands_without_labels = fill_byte_code_buf (Assembler); // 1st compilation
     Assembler -> ind_counter = 0;
 
-    listing_labeles_array(stdout, Assembler);
+    listing_labels_array(stdout, Assembler);
     
     fill_byte_code_buf (Assembler); // 2nd compilation with lables
     
@@ -98,7 +98,7 @@ size_t fill_byte_code_buf (asm_struct* Assembler) {
     size_t cmd_num         = 0;
     int    sscanf_check    = 0;
 
-    size_t count_of_commands_without_labeles = Assembler -> count_of_commands;
+    size_t count_of_commands_without_labels = Assembler -> count_of_commands;
 
     while (cmd_num < Assembler -> count_of_commands && 
            Assembler -> pointers_array[cmd_num] != NULL) 
@@ -110,7 +110,7 @@ size_t fill_byte_code_buf (asm_struct* Assembler) {
             return 0;
         }
 
-        int label_check = fill_label_array(Assembler, command_str, &count_of_commands_without_labeles);
+        int label_check = fill_label_array(Assembler, command_str, &count_of_commands_without_labels);
         if (label_check == IS_LABEL) {
             ++cmd_num;      
             continue;
@@ -129,7 +129,7 @@ size_t fill_byte_code_buf (asm_struct* Assembler) {
         ++cmd_num;
     }
 
-    return count_of_commands_without_labeles;
+    return count_of_commands_without_labels;
 }
 
 
@@ -206,18 +206,18 @@ int register_num (const char* argument_str) {
     return offset_from_first_reg;
 }
 
-int fill_label_array (asm_struct* Assembler, char* command_str, size_t* count_of_commands_without_labeles) {
+int fill_label_array (asm_struct* Assembler, char* command_str, size_t* count_of_commands_without_labels) {
     assert(command_str);
-    assert(count_of_commands_without_labeles);
+    assert(count_of_commands_without_labels);
     assert(Assembler);
 
     if (is_label(command_str)) {
 
         int label = *command_str - '0';
 
-        Assembler -> labeles_array[label] = Assembler -> ind_counter;
+        Assembler -> labels_array[label] = Assembler -> ind_counter;
 
-        --(*count_of_commands_without_labeles);
+        --(*count_of_commands_without_labels);
               
         return IS_LABEL;
     }
@@ -242,7 +242,7 @@ int identify_label (asm_struct* Assembler, const char* argument_str) {
             return NOT_LABEL;
         }
 
-        argument_int = Assembler -> labeles_array[label_number];
+        argument_int = Assembler -> labels_array[label_number];
     }
 
     else

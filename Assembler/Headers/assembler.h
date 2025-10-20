@@ -61,7 +61,7 @@ int    argument_identify  (asm_struct* Assembler, int command_int, char* argumen
 
 int    register_num       (const char* argument_str);
 
-int    fill_label_array   (asm_struct* Assembler, char*       command_str,  size_t* count_of_commands_without_labeles);
+int    fill_label_array   (asm_struct* Assembler, char*       command_str,  size_t* count_of_commands_without_labels);
 int    identify_label     (asm_struct* Assembler, const char* argument_str);
 int    is_label           (char*       string);
 

@@ -17,7 +17,7 @@ struct asm_struct {
     char*  asm_code_buf;
     char** pointers_array;
     int*   byte_code_buf;
-    int*   labeles_array;
+    int*   labels_array;
     size_t count_of_commands;
     size_t ind_counter;
     CmdStruct* cmd_info_arr;
@@ -39,7 +39,7 @@ void   listing_byte_code     (FILE* listing_file, asm_struct Assembler,
                               char* command_str,  char*     argument_str,
                               int   command_int,  int       argument_int);
 
-void  listing_labeles_array  (FILE* listing_file, asm_struct* Assembler);        
+void  listing_labels_array  (FILE* listing_file, asm_struct* Assembler);        
 
 int   my_strcmp              (const char* str1,      const char* str2);
 
