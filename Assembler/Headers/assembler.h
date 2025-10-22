@@ -6,7 +6,9 @@
 
 enum count_of_cmd_args {
     FAKE_ARG = 0,
-    TRUE_ARG = 1
+    TRUE_ARG = 1,
+    ONE_ARG  = 1,
+    NO_ARGS  = 0
 };
 
 enum function_status {

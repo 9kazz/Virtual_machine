@@ -1,94 +1,115 @@
-    PUSH 40
-    POPR RCX // SIZE X
-    PUSH 40
-    POPR RDX // SIZE Y
-    PUSH -1
-    POPR RAX // Х COORD
-    PUSH 0
-    POPR RBX // Y COORD
-    IN
-    POPR RFX // RADIUS
-    IN
-    POPR RGX // CENTER COORD X
-    IN
-    POPR RHX // CENTER COORD Y
+PUSH 40
+POPR RCX ; SIZE X
+
+PUSH 40
+POPR RDX ; SIZE Y
+
 PUSH -1
-PUSH -1
-0:
+POPR RAX ; Х COORD
+
+PUSH 0
+POPR RBX ; Y COORD
+
+IN
+POPR RFX ; RADIUS
+
+IN
+POPR RGX ; CENTER COORD X
+
+IN
+POPR RHX ; CENTER COORD Y
+
+PUSH -1 ; supportive commands
+PUSH -1 ; supportive commands
+
+OneIter:
 OUT
 OUT
-CALL :4 // NEXT PIXEL
-CALL :1 // CALC PIXEL NUM
-CALL :2 // CHANGE PIXEL
+CALL :NextPixel
+CALL :CalcPixelNum
+CALL :DrawPixel
 PUSHR REX
 PUSHR RCX
 PUSHR RDX
 MUL
-JB :0
+JB :OneIter
 HLT
-    1:
-PUSHR RBX // Y COORD
-PUSHR RCX // SIZE X
-MUL
-PUSHR RAX // X COORD
-ADD
-POPR REX            // PIXEL NUM
-RET
-  4:
-PUSHR RCX           // NEXT PIXEL
-PUSHR RAX
-JBE :5
-CALL :3
-OUT
-OUT
-RET
-5:
-CALL :6
-OUT
-OUT
-RET
-        3:
-    PUSH 1
-    PUSHR RAX
-    ADD
-    POPR RAX // X = X + 1
-    RET
-        6:
-    PUSH 0
-    POPR RAX // X = 0
-    PUSH 1
-    PUSHR RBX
-    ADD
-    POPR RBX // Y = Y + 1
-    RET
-        2:
-PUSHR RAX
-PUSHR RGX
-SUB
-PUSHR RAX
-PUSHR RGX
-SUB
-MUL
-PUSHR RBX
-PUSHR RHX
-SUB
-PUSHR RBX
-PUSHR RHX
-SUB
-MUL
-ADD
-PUSHR RFX
-PUSHR RFX
-MUL
-JBE :7
-OUT
-OUT
-PUSH 46
-POPM [REX]         // PRINT POINT
-RET
-7:
-OUT
-OUT
-PUSH 35
-POPM [REX]         // PRINT HASH
-RET
+
+    CalcPixelNum:
+        PUSHR RBX ; Y COORD
+        PUSHR RCX ; SIZE X
+        MUL
+        PUSHR RAX ; X COORD
+        ADD
+        POPR REX ; Safe pixel number
+        RET
+
+    NextPixel:
+        PUSHR RCX
+        PUSHR RAX
+        JBE :NewLine
+        CALL :IncreaseX
+        OUT
+        OUT
+        RET
+
+        NewLine:
+            CALL :IncreaseY
+            OUT
+            OUT
+            RET
+
+    IncreaseX:
+        PUSH 1
+        PUSHR RAX
+        ADD
+        POPR RAX ; X = X + 1
+        RET
+
+    IncreaseY:
+        PUSH 0
+        POPR RAX ; X = 0
+        PUSH 1
+        PUSHR RBX
+        ADD
+        POPR RBX ; Y = Y + 1
+        RET
+
+    DrawPixel:
+        PUSHR RAX
+        PUSHR RGX 
+        SUB ; X - X(centre)
+        PUSHR RAX
+        PUSHR RGX 
+        SUB
+        MUL ; ( X - X(centre) ) ^ 2
+        PUSH 2
+        MUL
+
+        PUSHR RBX
+        PUSHR RHX
+        SUB ; Y - Y(centre)
+        PUSHR RBX
+        PUSHR RHX
+        SUB
+        MUL ; ( Y - Y(centre) ) ^ 2
+
+        ADD ; ( X - X(centre) ) ^ 2 + ( Y - Y(centre) ) ^ 2
+
+        PUSHR RFX
+        PUSHR RFX 
+        MUL ; R ^ 2
+
+        JBE :PrintHash
+        OUT
+        OUT
+        PUSH 46
+        POPM [REX] ; print "."
+        RET
+
+        PrintHash:
+            OUT
+            OUT
+            PUSH 35
+            POPM [REX] ; print "#"
+            RET

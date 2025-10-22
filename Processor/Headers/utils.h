@@ -20,10 +20,16 @@ const int CAPASITY_OF_RAM       =  RAM_SIZE_X * RAM_SIZE_Y + 1;
 
 
 enum errors_and_success {
-    UNKNOWN_COM = -100,
-    INCOR_INPUT = -101, 
-    DESTROY_SUC =  100, 
-    SUCCESS     =  777
+    UNKNOWN_COM       = -100,
+    INCOR_INPUT       = -101, 
+    DESTROY_SUC       =  100, 
+    SUCCESS           =  777,
+    FAIL              =  -1,
+    NULL_POINT_PROC   = -2,
+    NEG_BC_SIZE       = -3,
+    NULL_POINT_BC_BUF = -4,
+    NULL_POINT_REG    = -5,
+    NULL_POINT_RAM    = -6
 };
 
 enum commands {

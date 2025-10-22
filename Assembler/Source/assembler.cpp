@@ -47,8 +47,7 @@ CmdStruct cmd_##cmd_name {};                                                    
     const char* str_##cmd_name = #cmd_name;                                                                         \
     int hash_##cmd_name = 0;                                                                                        \
                                                                                                                     \
-    for (size_t char_num = 0; str_##cmd_name[char_num] != '\0'; char_num++)                                         \
-        hash_##cmd_name = (hash_##cmd_name * PRIME_COEF_HASH + str_##cmd_name[char_num]) % MAX_INT_VALUE;           \
+    hash_##cmd_name = hash_function(str_##cmd_name);                                                                \
                                                                                                                     \
     cmd_##cmd_name.hash = hash_##cmd_name;                                                                          \
                                                                                                                     \
@@ -139,8 +138,7 @@ int command_identify (asm_struct* Assembler, const char* command_str) {
 
     int finding_hash = 0;                                                         
 
-    for (size_t char_num = 0; command_str[char_num] != '\0'; char_num++)
-        finding_hash = (finding_hash * PRIME_COEF_HASH + command_str[char_num]) % MAX_INT_VALUE; 
+    finding_hash = hash_function(command_str);
 
     for (size_t cmd_info_el = 0; cmd_info_el < MAX_COUNT_OF_CMD; cmd_info_el++) {
 
@@ -226,8 +224,7 @@ int fill_label_array (asm_struct* Assembler, char* command_str, size_t* count_of
 
         Assembler -> labels_array[Assembler->label_ind_counter].name = strdup(command_str);
     
-        for (size_t char_num = 0; command_str[char_num] != '\0' ; char_num++)
-            hash = (hash * PRIME_COEF_HASH + Assembler->labels_array[Assembler->label_ind_counter].name[char_num]) % MAX_INT_VALUE; 
+        hash = hash_function(Assembler->labels_array[Assembler->label_ind_counter].name);
         
         Assembler -> labels_array[Assembler->label_ind_counter].hash  = hash;
 

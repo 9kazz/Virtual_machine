@@ -21,6 +21,7 @@ CalcErr_t processor(ProcStruct* Proc_struct) { // each command has argument (it 
     while (Proc_struct -> bite_code.ind_counter  <  Proc_struct -> bite_code.size &&
            Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter]  !=  CMD_HLT) 
     {        
+
         // printf("%d: %s (%d)     (RAX = %d)\n", Proc_struct ->bite_code.ind_counter, Proc_struct ->cmd_info_arr[Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter]].name, Proc_struct ->bite_code.buffer[Proc_struct->bite_code.ind_counter + 1], Proc_struct ->register_buf[0]);
 
         // Proc_dump_stack_only(stdout, Proc_struct);
@@ -30,6 +31,11 @@ CalcErr_t processor(ProcStruct* Proc_struct) { // each command has argument (it 
         // printf("\n");
 
         code_of_cmd = Proc_struct -> bite_code.buffer[Proc_struct -> bite_code.ind_counter];
+
+        if (code_of_cmd > MAX_COUNT_OF_CMD || code_of_cmd < 0) {
+            fprintf(stderr, "Incorrect command\n");
+            return FAIL;
+        }
         
         Proc_struct -> cmd_info_arr[code_of_cmd].cmd_func (Proc_struct);
     }
@@ -279,11 +285,11 @@ CalcErr_t Proc_Verify (ProcStruct* Proc_struct, const char* checking_function) {
         if (Proc_struct == NULL) {
 
             fprintf(LogFile, "Calc_Verify: NULL pointer to ProcStruct" "\n");
-            fprintf(LogFile, "Error code: %d (NULL_POINT_CALC)" "\n\n", NULL_POINT_CALC);
+            fprintf(LogFile, "Error code: %d (NULL_POINT_CALC)" "\n\n", NULL_POINT_PROC);
 
-            Proc_Dump(Proc_struct);
+            Proc_Dump(LogFile, Proc_struct);
 
-            error_code = error_code | NULL_POINT_CALC;
+            error_code = error_code | NULL_POINT_PROC;
 
             fprintf(LogFile, "Calc_Verify: verification ended with error code: %d\n", error_code);
             return error_code;
@@ -294,7 +300,7 @@ CalcErr_t Proc_Verify (ProcStruct* Proc_struct, const char* checking_function) {
             fprintf(LogFile, "Calc_Verify: negative size of bite code buffer in %s" "\n", checking_function);
             fprintf(LogFile, "Error code: %d (NEG_BC_SIZE)" "\n\n", NEG_BC_SIZE);
 
-            Proc_Dump(Proc_struct);
+            Proc_Dump(LogFile, Proc_struct);
 
             error_code = error_code | NEG_BC_SIZE;   
             
@@ -307,7 +313,7 @@ CalcErr_t Proc_Verify (ProcStruct* Proc_struct, const char* checking_function) {
             fprintf(LogFile, "Calc_Verify: NULL pointer to bite code buffer in %s" "\n", checking_function);
             fprintf(LogFile, "Error code: %d (NULL_POINT_BC_BUF)" "\n\n", NULL_POINT_BC_BUF);
 
-            Proc_Dump(Proc_struct);
+            Proc_Dump(LogFile, Proc_struct);
 
             error_code = error_code | NULL_POINT_BC_BUF;     
             
@@ -318,10 +324,10 @@ CalcErr_t Proc_Verify (ProcStruct* Proc_struct, const char* checking_function) {
 
         if (Proc_struct -> register_buf == NULL) {
 
-            fprintf(LogFile, "Calc_Verify: NULL poiner to register buffer in %s" "\n", checking_function);
+            fprintf(LogFile, "Calc_Verify: NULL pointer to register buffer in %s" "\n", checking_function);
             fprintf(LogFile, "Error code: %d (NULL_POINT_REG)" "\n\n", NULL_POINT_REG);
 
-            Proc_Dump(Proc_struct);
+            Proc_Dump(LogFile, Proc_struct);
 
             error_code = error_code | NULL_POINT_REG;       
             
@@ -331,19 +337,19 @@ CalcErr_t Proc_Verify (ProcStruct* Proc_struct, const char* checking_function) {
 
         if (Proc_struct -> RAM_buf == NULL) {
 
-            fprintf(LogFile, "Calc_Verify: NULL poiner to RAM buffer in %s" "\n", checking_function);
-            fprintf(LogFile, "Error code: %d (NULL_POINT_REG)" "\n\n", NULL_POINT_REG);
+            fprintf(LogFile, "Calc_Verify: NULL pointer to RAM buffer in %s" "\n", checking_function);
+            fprintf(LogFile, "Error code: %d (NULL_POINT_RAM)" "\n\n", NULL_POINT_RAM);
 
-            Proc_Dump(Proc_struct);
+            Proc_Dump(LogFile, Proc_struct);
 
-            error_code = error_code | NULL_POINT_;       
+            error_code = error_code | NULL_POINT_RAM;       
             
             fprintf(LogFile, "Calc_Verify: verification ended with error code: %d\n", error_code);
             return error_code;
         }        
 
     #endif
-//TODO:
+
     return error_code;
 }
 

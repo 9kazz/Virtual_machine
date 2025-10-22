@@ -64,7 +64,7 @@ int* create_bite_code_buf (FILE* input_file, size_t* bite_code_size) {
 
     fscanf(input_file, "%d %d %d", &count_of_cmd, &version, &signature);
 
-    *bite_code_size = size_of_file(input_file);
+    *bite_code_size = 2 * count_of_cmd;
 
     SAFE_CALLOC(bite_code_buf, *bite_code_size, int)
 
@@ -134,7 +134,7 @@ void command_line_flags(int argc, char* argv[], FILE** input_file) {
                 break;
 
             default:
-                fprintf(stderr, "command_line_flags: unexpectid error\n");
+                fprintf(stderr, "command_line_flags: unexpected error\n");
         }
     }
 }

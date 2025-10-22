@@ -14,13 +14,15 @@ int create_pointers_array (FILE* file_input, asm_struct* Assembler) {
 
     size_t fsize = size_of_file(file_input);
 
-    Assembler -> asm_code_buf = (char*) calloc(fsize, sizeof(char));
+    SAFE_CALLOC(temp_asm_code_buf, fsize, char)
+    Assembler -> asm_code_buf = temp_asm_code_buf;
  
     fill_buffer(Assembler, file_input, fsize);
 
     Assembler -> count_of_commands = str_change_char(Assembler, '\n', '\0') + 1;
 
-    Assembler -> pointers_array = (char**) calloc(Assembler -> count_of_commands + 1, sizeof(Assembler -> asm_code_buf));
+    SAFE_CALLOC(temp_pointers_arr, Assembler -> count_of_commands + 1, char*)
+    Assembler -> pointers_array = temp_pointers_arr;
 
     fill_point_ar(Assembler);
 
@@ -216,4 +218,25 @@ int Assembler_struct_Dtor (asm_struct* Assembler) {
     free(Assembler -> labels_array);
 
     return DESTROY_SUC;
+}
+
+int hash_function (const char* hashing_str) {
+    assert(hashing_str);
+
+    int hash = 0;
+    int hash_constant = 0;
+
+    for (size_t char_num = 0; hashing_str[char_num] != '\0' ; char_num++) {
+            hash_constant = hash * PRIME_COEF_HASH;
+            hash = hash_constant + hashing_str[char_num];
+
+            if ( (hash_constant > 0 && hashing_str[char_num] > 0 && hash < 0) ||   // overflow of int
+                 (hash_constant < 0 && hashing_str[char_num] < 0 && hash > 0) )  
+            {
+                fprintf(stderr, "Overflow of hash\n");
+            }
+    }
+
+
+    return hash;
 }

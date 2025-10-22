@@ -1,19 +1,18 @@
 IN
-POPR RAX
-CALL :abc
+POPR RAX ; x = n
+CALL :fact
 MUL
-
-
-
 HLT
-    abc:
-    PUSHR RAX
+
+    fact:
+    PUSHR RAX ; x = n
     PUSHR RAX
     PUSH 1
-    JE :2
-    SUB
+    JE :ArgIsOne
+    SUB ; x = n - 1
     POPR RAX
-    CALL :abc
-        2:
+
+    CALL :fact
+        ArgIsOne:
         MUL
         RET

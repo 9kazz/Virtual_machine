@@ -55,6 +55,8 @@ void  command_line_flags     (int argc, char* argv[], FILE** input_file, FILE** 
 
 int   Assembler_struct_Dtor  (asm_struct* Assembler);
 
+int   hash_function          (const char* hashing_str); 
+
 
 #define SAFE_CALLOC(name, size_of_buf, el_type)                                     \
     el_type* temp_##name = (el_type*) calloc(size_of_buf, sizeof(el_type));         \
