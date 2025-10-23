@@ -16,7 +16,8 @@ enum function_status {
     UNKNOWN_COM = -1,
     NOT_LABEL   =  0,
     IS_LABEL    =  1,
-    DESTROY_SUC = 666
+    DESTROY_SUC = 666,
+    NOT_FIND    = -1
 };
 
 enum commands {
@@ -58,8 +59,8 @@ int assembler          (asm_struct* Assembler);
 CmdStruct*   create_cmd_info_arr(void);
 
 size_t fill_byte_code_buf (asm_struct* Assembler);
-int    command_identify   (asm_struct* Assembler, const char* command_str);
-int    argument_identify  (asm_struct* Assembler, int command_int, char* argument_str);
+int    command_identify   (asm_struct* Assembler, const char* command_str,  int* hash_of_cmd);
+int    argument_identify  (asm_struct* Assembler, int hash_of_cmd, char* argument_str);
 
 int    register_num       (const char* argument_str);
 

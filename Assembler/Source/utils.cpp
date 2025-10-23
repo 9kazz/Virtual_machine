@@ -56,8 +56,8 @@ char* fill_buffer (asm_struct* Assembler, FILE* file_input, size_t fsize) {
     Assembler -> asm_code_buf [new_size_buffer - 2] = '\0';
     Assembler -> asm_code_buf [new_size_buffer - 1] = EOF;
 
-    for (size_t i = 0; i < new_size_buffer; i++)
-        printf("%d ", Assembler->asm_code_buf[i]);
+    // for (size_t i = 0; i < new_size_buffer; i++)
+    //     printf("%d ", Assembler->asm_code_buf[i]);
 
     return Assembler -> asm_code_buf; 
 }
@@ -145,7 +145,7 @@ void listing_labels_array (FILE* listing_file, asm_struct* Assembler) {
     fprintf(listing_file, "\n-------------------------------------------------------------------------------\n");
 
     fprintf(listing_file, "  Index of label\t" "Label name\t" "Index in byte-code\t" "    " "Hash\n\n");
-    for (int el_num = 0; el_num < LABEL_BUF_SIZE; el_num++) {
+    for (size_t el_num = 0; el_num < LABEL_BUF_SIZE; el_num++) {
         
         if (el_num < Assembler -> label_ind_counter) 
         {
@@ -212,7 +212,7 @@ int Assembler_struct_Dtor (asm_struct* Assembler) {
     free(Assembler -> pointers_array);
     free(Assembler -> cmd_info_arr);
 
-    for (size_t labels_arr_el = 0; labels_arr_el < Assembler -> label_ind_counter; labels_arr_el++)
+    for (size_t labels_arr_el = 0; labels_arr_el < LABEL_BUF_SIZE; labels_arr_el++)
         free(Assembler -> labels_array[labels_arr_el].name);
 
     free(Assembler -> labels_array);
@@ -240,3 +240,68 @@ int hash_function (const char* hashing_str) {
 
     return hash;
 }
+
+int comp_sort_int(const void* struct_a, const void* struct_b) {
+
+    const CmdStruct* cmd_a = (const CmdStruct*) struct_a;
+    const CmdStruct* cmd_b = (const CmdStruct*) struct_b;
+
+    int hash_a = cmd_a -> hash;
+    int hash_b = cmd_b -> hash;
+
+    if (hash_a < hash_b) 
+        return -1;
+
+    if (hash_a > hash_b) 
+        return 1;
+
+    return 0;
+}
+
+int comp_sort_int_label(const void* struct_a, const void* struct_b) {
+
+    const LabelStruct* cmd_a = (const LabelStruct*) struct_a;
+    const LabelStruct* cmd_b = (const LabelStruct*) struct_b;
+
+    int hash_a = cmd_a -> hash;
+    int hash_b = cmd_b -> hash;
+
+    if (hash_a < hash_b) 
+        return -1;
+
+    if (hash_a > hash_b) 
+        return 1;
+
+    return 0;
+}
+
+#define BIN_SEARCH_STRUCT_ARR(name, array_type, arr_size, finding_value)                            \
+                                                                                                    \
+size_t bin_search_##name(array_type* array_type##_arr, int finding_int) {                           \
+    assert(array_type##_arr);                                                                       \
+                                                                                                    \
+    size_t left  = 0;                                                                               \
+    size_t right = arr_size - 1;                                                                    \
+    size_t mid   = 0;                                                                               \
+                                                                                                    \
+    while (left <= right) {                                                                         \
+                                                                                                    \
+        mid = left + (right - left) / 2;                                                            \
+                                                                                                    \
+        if (array_type##_arr[mid]finding_value == finding_int)                                      \
+            return mid;                                                                             \
+                                                                                                    \
+        if (array_type##_arr[mid]finding_value < finding_int)                                       \
+            left = mid + 1;                                                                         \
+                                                                                                    \
+        if (array_type##_arr[mid]finding_value > finding_int)                                       \
+            right = mid - 1;                                                                        \
+    }                                                                                               \
+                                                                                                    \
+    return NOT_FIND;                                                                                \
+}
+
+BIN_SEARCH_STRUCT_ARR(LabelStruct_hash,    LabelStruct, LABEL_BUF_SIZE,    .hash)
+BIN_SEARCH_STRUCT_ARR(CmdStruct_hash,      CmdStruct,   MAX_COUNT_OF_CMD,  .hash)
+
+#undef BIN_SEARCH_STRUCT_ARR

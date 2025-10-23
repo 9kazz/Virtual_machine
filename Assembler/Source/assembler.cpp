@@ -83,6 +83,12 @@ CmdStruct* create_cmd_info_arr(void) {
     ONE_CMD_INFO(PUSHM, ONE_ARG)
     ONE_CMD_INFO(POPM,  ONE_ARG)
 
+    qsort(cmd_info_arr, MAX_COUNT_OF_CMD, sizeof(cmd_info_arr[0]), comp_sort_int);
+
+    // for(size_t i = 0; i < MAX_COUNT_OF_CMD; i++) {
+    //     printf("%s  %d  %d  %d\n", cmd_info_arr[i].name, cmd_info_arr[i].code, cmd_info_arr[i].hash, cmd_info_arr[i].arg_count);
+    // }
+
     return cmd_info_arr;
 }
 
@@ -96,6 +102,7 @@ size_t fill_byte_code_buf (asm_struct* Assembler) {
 
     size_t cmd_num         = 0;
     int    sscanf_check    = 0;
+    int    hash_of_cmd     = 0;
 
     size_t count_of_commands_without_labels = Assembler -> count_of_commands;
 
@@ -115,8 +122,8 @@ size_t fill_byte_code_buf (asm_struct* Assembler) {
             continue;
         }
 
-        int  command_int = command_identify (Assembler, (const char*)  command_str); // each command has argument (it can be fictive (POISON))
-        int argument_int = argument_identify(Assembler, command_int, argument_str);
+        int  command_int = command_identify (Assembler, (const char*)  command_str, &hash_of_cmd); // each command has argument (it can be fictive (POISON))
+        int argument_int = argument_identify(Assembler, hash_of_cmd, argument_str);
 
         Assembler -> byte_code_buf[ Assembler -> ind_counter ++ ] = command_int;
         Assembler -> byte_code_buf[ Assembler -> ind_counter ++ ] = argument_int;
@@ -132,30 +139,31 @@ size_t fill_byte_code_buf (asm_struct* Assembler) {
 }
 
 
-int command_identify (asm_struct* Assembler, const char* command_str) {
+int command_identify (asm_struct* Assembler, const char* command_str, int* hash_of_cmd) {
     assert(command_str);
     assert(Assembler);
 
     int finding_hash = 0;                                                         
+    int code_of_cmd  = 0;
 
     finding_hash = hash_function(command_str);
 
-    for (size_t cmd_info_el = 0; cmd_info_el < MAX_COUNT_OF_CMD; cmd_info_el++) {
+    size_t cmd_arr_el = bin_search_CmdStruct_hash(Assembler -> cmd_info_arr, finding_hash);
 
-        if (Assembler -> cmd_info_arr[cmd_info_el].hash == finding_hash)
-            return Assembler -> cmd_info_arr[cmd_info_el].code;
+    code_of_cmd  = Assembler -> cmd_info_arr[cmd_arr_el].code;
+    *hash_of_cmd = Assembler -> cmd_info_arr[cmd_arr_el].hash; 
 
-        else
-            continue;
-    }
-
-    return UNKNOWN_COM;
+    return code_of_cmd;
 }
 
-int argument_identify (asm_struct* Assembler, int command_int, char* argument_str) {
+int argument_identify (asm_struct* Assembler, int hash_of_cmd, char* argument_str) {
     assert(argument_str);
 
-    switch (Assembler -> cmd_info_arr[command_int].arg_count)
+    int ind_cmd_in_arr = bin_search_CmdStruct_hash(Assembler -> cmd_info_arr, hash_of_cmd);
+    
+    int command_int = Assembler -> cmd_info_arr[ind_cmd_in_arr].code;
+
+    switch (Assembler -> cmd_info_arr[ind_cmd_in_arr].arg_count)
     {
         case FAKE_ARG:
             *argument_str =  '\0';
@@ -243,6 +251,8 @@ int identify_label (asm_struct* Assembler, char* argument_str) {
     assert(argument_str);
     assert(Assembler);
 
+    qsort(Assembler -> labels_array, LABEL_BUF_SIZE, sizeof(Assembler -> labels_array[0]), comp_sort_int_label);
+
     int argument_int = 0;
     int finding_hash = 0;
 
@@ -250,17 +260,18 @@ int identify_label (asm_struct* Assembler, char* argument_str) {
     {
         ++argument_str;
 
-        for (size_t char_num = 0; argument_str[char_num] != '\0'; char_num++)
-            finding_hash = (finding_hash * PRIME_COEF_HASH + argument_str[char_num]) % MAX_INT_VALUE;  
+        finding_hash = hash_function(argument_str);
 
-        for (size_t label_arr_el = 0; label_arr_el < LABEL_BUF_SIZE; label_arr_el++) {
+        size_t label_arr_el = bin_search_LabelStruct_hash(Assembler -> labels_array, finding_hash);
+        //  for (size_t label_arr_el = 0; label_arr_el < LABEL_BUF_SIZE; label_arr_el++) {
 
-            if (Assembler -> labels_array[label_arr_el].hash == finding_hash)
-                argument_int = Assembler -> labels_array[label_arr_el].index;
+        //     if (Assembler -> labels_array[label_arr_el].hash == finding_hash)
+        //         argument_int = Assembler -> labels_array[label_arr_el].index;
 
-            else
-                continue;
-        }
+        //     else
+        //         continue;
+        // }
+        argument_int = Assembler -> labels_array[label_arr_el].index;
     }
 
     else

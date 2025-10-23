@@ -47,16 +47,21 @@ void   listing_byte_code     (FILE* listing_file, asm_struct Assembler,
                               char* command_str,  char*     argument_str,
                               int   command_int,  int       argument_int);
 
-void  listing_labels_array  (FILE* listing_file, asm_struct* Assembler);        
+void   listing_labels_array   (FILE* listing_file, asm_struct* Assembler);        
 
-int   my_strcmp              (const char* str1,      const char* str2);
+int    my_strcmp              (const char* str1,      const char* str2);
 
-void  command_line_flags     (int argc, char* argv[], FILE** input_file, FILE** output_file);
+void   command_line_flags     (int argc, char* argv[], FILE** input_file, FILE** output_file);
 
-int   Assembler_struct_Dtor  (asm_struct* Assembler);
+int    Assembler_struct_Dtor  (asm_struct* Assembler);
 
-int   hash_function          (const char* hashing_str); 
+int    hash_function          (const char* hashing_str); 
 
+int    comp_sort_int          (const void* a, const void* b);
+int comp_sort_int_label(const void* struct_a, const void* struct_b);
+
+size_t bin_search_LabelStruct_hash (LabelStruct* LabelStruct_arr, int finding_int);
+size_t bin_search_CmdStruct_hash   (CmdStruct*   CmdStruct_arr,   int finding_int);
 
 #define SAFE_CALLOC(name, size_of_buf, el_type)                                     \
     el_type* temp_##name = (el_type*) calloc(size_of_buf, sizeof(el_type));         \
